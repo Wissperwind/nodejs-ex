@@ -35,7 +35,7 @@ function dbConnection() {
 	});
 		
 	/* Loads the student list from the database table */
-		console.log("Retrieving Student list...");
+		console.log("Retrieving user list...");
 		
 		connection.query("SELECT * FROM users", 
 						 function(err, rows, fields) {
