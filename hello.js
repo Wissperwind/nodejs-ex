@@ -1,5 +1,7 @@
 const http = require('http');
 const port = 8080;
+
+
 var onRequest = function(req, res){
   console.log(req.method+': '+req.url);
   res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -53,7 +55,3 @@ function dbConnection() {
 		});		
 	}
 	
-	
-
-
-
