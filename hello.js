@@ -1,6 +1,3 @@
-var mysql = require('mysql');
-
-
 const http = require('http');
 const port = 8080;
 var onRequest = function(req, res){
@@ -22,9 +19,8 @@ function dbConnection() {
 	
 	
 	console.log('in db function');
-	
-	
-	that = this;
+
+	var mysql = require('mysql');
 	
 	var connection = mysql.createConnection({
 			'host' 		: 'sql11.freemysqlhosting.net',
@@ -37,27 +33,23 @@ function dbConnection() {
 	});
 		
 	/* Loads the student list from the database table */
-	that.retrieveStudents = function(callback) {
 		console.log("Retrieving Student list...");
-		that.students = [];
+		
 		connection.query("SELECT * FROM users", 
 						 function(err, rows, fields) {
 			if(!err) {
-				students = []
+				
 				for(i=0; i<rows.length; i++) {
 					console.log(rows[i].id+' '+rows[i].username);
-					student = {
-						id : rows[i].id,
-						name : rows[i].username
+					
 					}
-					students.push(student);
-				}
-				console.log(students);
-				callback(students);
+
+				
+				
 			} else {
 				console.log("Error querying the mysql database");
 			}
-			callback(null);
+			
 		});		
 	}
 	
