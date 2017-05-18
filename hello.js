@@ -56,4 +56,4 @@ function dbConnection() {
 	
 }
 
-module.exports = new dbConnection();
+
