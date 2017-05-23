@@ -3,6 +3,16 @@ const port = 8080;
 
 
 var onRequest = function(req, res){
+	
+	// Testing Google's API
+	googleMapsClient.geocode({
+	  address: '1600 Amphitheatre Parkway, Mountain View, CA'
+	}, function(err, response) {
+	  if (!err) {
+		console.log(response.json.results);
+	  }
+	});
+	
   console.log(req.method+': '+req.url);
   res.writeHead(200, {'Content-Type': 'text/plain'});
   res.write('Hello Team Uniform!');
@@ -55,3 +65,7 @@ function dbConnection() {
 		});		
 	}
 	
+// Testing Google's API
+var googleMapsClient = require('@google/maps').createClient({
+  key: "AIzaSyA3-uXnqloD1leqZ3bwWcaq4xesQyHl2r0"
+});
