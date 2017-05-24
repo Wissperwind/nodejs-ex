@@ -12,7 +12,8 @@
     "mongodb": "^2.1.16",
     "morgan": "^1.7.0",
     "object-assign":"4.1.0",
-	"@google/maps":"*"
+	"@google/maps":"*",
+    "mysql": "2.13.0"
   },
   "engine": {
     "node": "*",
@@ -20,7 +21,7 @@
   },
   "scripts": {
 	"start": "node hello.js",
-	"install": "npm install mysql",
+	//"install": "npm install mysql",
     "test": "IP=0.0.0.0 PORT=3030 mocha --timeout 5000 tests/*_test.js"
   },
   "repository": {
