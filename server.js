@@ -1,6 +1,5 @@
 const restify = require('restify');
 const db = require('./database');
-const login = require('./login');
 
 const port = 8080;
 
@@ -12,6 +11,8 @@ server.use(restify.queryParser());
 server.on('uncaughtException', function (req, res, route, err) {
     console.log('uncaughtException', err.stack);
 });
+
+var login = require('./login');
 
 server.post('/signup', login.signUp);
 
@@ -26,6 +27,6 @@ server.get('venues/:id',				db.getVenue);
 }); */
 
 server.listen(port, function(){
-	console.log('%s is listening at %s : %s', server.name, server.url, port);
+	console.log('%s is listening at %s', server.name, server.url);
 	db.connect();
 });
