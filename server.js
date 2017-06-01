@@ -3,7 +3,8 @@ const db = require('./database');
 
 const port = 8080;
 
-var server = restify.createServer();
+server = restify.createServer();
+server.listen(port)
 
 server.use(restify.bodyParser());
 server.use(restify.queryParser());
