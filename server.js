@@ -1,5 +1,5 @@
 const restify = require('restify');
-const db = require('./database');
+const database = require('./database');
 
 const port = 8080;
 
@@ -20,8 +20,8 @@ server.post('/signup', login.signUp);
 server.post({url:'/login'}, login.loginRoute);
 server.get({url:'/hello'}, login.helloRoute);
 
-server.get('venues/position/:latlng',	db.getVenues); // latlng should be "lat,lng", split did not work with #
-server.get('venues/:id',				db.getVenue);
+server.get('venues/position/:latlng',	database.getVenues); // latlng should be "lat,lng", split did not work with #
+server.get('venues/:id',				database.getVenue);
 
 /* server.listen(3000, function(){
     console.log('%s is listening at %s', server.name, server.url);
@@ -29,5 +29,5 @@ server.get('venues/:id',				db.getVenue);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
-	db.connect();
+	database.connect();
 });
