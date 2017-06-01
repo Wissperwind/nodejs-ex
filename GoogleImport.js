@@ -3,8 +3,8 @@ function GoogleImporter(){
 	var that = this;
 	
 	const GOOGLE_KEY = "AIzaSyC-hkv1dS7t-jXthfGmCOIjwyvPnUCLvDE"; //Should go into the environment variables for secrecy
-	//that.SEARCH_RADIUS = 10000; // meters; what's a good value? Max 200 venues are returned per search request
-	that.SEARCH_RADIUS = 500; //for testing
+	that.SEARCH_RADIUS = 5000; // meters; what's a good value? Max 200 venues are returned per search request
+	//that.SEARCH_RADIUS = 500; //for testing
 	
 	const request = require('request');
 	
@@ -74,41 +74,6 @@ function GoogleImporter(){
 			}
 		});
 	};
-	
-	// that.getVenues = function(lat, lon){
-	
-		// var options = {
-			// method: 'GET',
-			// uri: 'https://maps.googleapis.com/maps/api/place/radarsearch/json',
-			// qs: {
-				// key: GOOGLE_KEY,
-				// location: "" + lat + "," + lon,
-				// radius: 1000,
-				// type: 'restaurant'
-			// }
-		// };
-		
-		// function callback(err, res, body){
-			// if(!err && res.statusCode == 200){
-				// var locations = JSON.parse(body);
-				// if(locations.status == "OK"){
-					// details = [];
-					// for (i = 0; i < locations.results.length; i++) {
-						// id = locations.results[i].place_id;
-						// console.log(id);
-						// details[i] = that.getVenueDetails(id);
-					// }
-					// return details;
-				// } else {
-					// console.log(locations.status);
-				// }
-			// } else {
-				// console.log("Status Code: " + res.statusCode);
-			// }
-		// }
-		
-		// request(options, callback);
-	// };
 }
 
 module.exports = new GoogleImporter();

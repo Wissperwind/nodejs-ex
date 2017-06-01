@@ -5,26 +5,27 @@ function dbConnection() {
 	const mysql = require('mysql');
 	var GoogleImport = require('./GoogleImport')
 	
-	//const USER_SEARCH_RADIUS = 1000;
-	const USER_SEARCH_RADIUS = 400; //for testing
+	const USER_SEARCH_RADIUS = 1000;
+	//const USER_SEARCH_RADIUS = 400; //for testing
 	// meters; for the mobile application, so all venues in our db in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	// how large should our radius be?
 	
 	that = this;
 	
-	// var connection = mysql.createConnection({
-			// 'host' 		: 'sql11.freemysqlhosting.net',
-			// 'user'		: 'sql11175021',
-			// 'password'	: 'fXIz3dRIpx',
-			// 'database'	: 'sql11175021'		
-		// });	
-	
 	var connection = mysql.createConnection({
+			'host' 		: 'sql11.freemysqlhosting.net',
+			'user'		: 'sql11175021',
+			'password'	: 'fXIz3dRIpx',
+			'database'	: 'sql11175021'		
+		});	
+
+// for local testing
+/* 	var connection = mysql.createConnection({
 			'host' 		: 'localhost',
 			'user'		: 'root',
 			'password'	: '',
 			'database'	: 'iptk'		
-		});	
+		});	 */
 	
 	that.connect = function(){
 		connection.connect( function(err) {
