@@ -135,7 +135,7 @@ function dbConnection() {
 				}
 			}
 		
-			query = "INSERT INTO venues SET id=?, lat=?, lng=?, name=?, city=?, address=?, phone=?, website=?, weekday_text=?, price_level=?, icon=?";
+			query = "INSERT INTO venues SET google_id=?, lat=?, lng=?, name=?, city=?, address=?, phone=?, website=?, weekday_text=?, price_level=?, icon=?";
 			connection.query( query,
 			[
 				venue.place_id,
@@ -152,7 +152,7 @@ function dbConnection() {
 			],
 			function(err, result){
 				if(!err) {
-					console.log("Inserted venue into db: " + venue.place_id);
+					console.log("Inserted venue into db: " + result.insertId);
 					callback(venue);
 				} else {
 					console.log("Error trying to insert venue into database");
@@ -211,7 +211,7 @@ function dbConnection() {
 				// check if place_id is already in db
 				if(!that.isResponseEmpty(venues)){
 					for(var j=0; j<venues.length; j++){
-						if(ids[counter] == venues[j].id){
+						if(ids[counter] == venues[j].google_id){
 							idInDB = true;
 							break;
 						}
