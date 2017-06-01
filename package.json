@@ -12,7 +12,8 @@
     "mongodb": "^2.1.16",
     "morgan": "^1.7.0",
     "object-assign":"4.1.0",
-	"@google/maps":"*",
+	"request":"*",
+	"restify":"*",
     "mysql": "2.13.0"
   },
   "engine": {
