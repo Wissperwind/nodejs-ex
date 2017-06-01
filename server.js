@@ -4,7 +4,7 @@ const login = require('./login');
 
 const port = 8080;
 
-server = restify.createServer();
+var server = restify.createServer();
 
 server.use(restify.bodyParser());
 server.use(restify.queryParser());
