@@ -82,7 +82,19 @@ function GoogleImporter(){
 			request(searchVenues(lat, lng, 'bar'), processVenues(function(bars){
 				request(searchVenues(lat, lng, 'cafe'), processVenues(function(cafes){
 					request(searchVenues(lat, lng, 'night_club'), processVenues(function(clubs){
+						
 						locations = locations.concat(restaurants, bars, cafes, clubs);
+						
+						// remove duplicates
+						console.log("Removing duplicate results");
+						var noDups = {};
+						for(var i=0; i<locations.length; i++){
+							noDups[locations[i]] = locations[i];
+						}
+						locations = [];
+						for(var key in noDups)
+							locations.push(noDups[key]);
+						
 						callback(locations);						
 					}));
 				}));

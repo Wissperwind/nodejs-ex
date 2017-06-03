@@ -154,6 +154,7 @@ function venueModule() {
 					venue = {};
 					// What should go into our response?
 					venue.id = rows[i].id;
+					venue.google_id = rows[i].google_id;
 					venue.lat = rows[i].lat;
 					venue.lng = rows[i].lng;
 					venue.name = rows[i].name;
