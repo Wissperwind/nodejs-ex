@@ -11,6 +11,8 @@ function venueModule() {
 	// meters; for the mobile application, so all venues in our db in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	// how large should our radius be?
 	
+	var isAddingVenuesToDB = false;
+	
 	function getDistanceInMeters(lat1, lon1, lat2, lon2){
 		var radius = 6378137; // (equatorial) earth radius in meters
 		var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
@@ -171,10 +173,27 @@ function venueModule() {
 	that.findVenue = function(id, callback){
 		database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
-				
+				for(var i=0; i<rows.length; i++){
+					console.log("Found venue: " + rows[i].name);
+					var venue = {
+						id:	rows[i].id,
+						name: rows[i].name,
+						lat: rows[i].lat,
+						lng: rows[i].lng,
+						address: rows[i].address,
+						phone: rows[i].phone,
+						website: rows[i].website,
+						weekday_text: rows[i].weekday_text,
+						rating: rows[i].rating,
+						price_level: rows[i].price_level
+					};
+					callback(venue);
+					return;
+				}
 			} else {
 				console.log("Error querying db for venues")
 			}
+			callback(null);
 		});
 	};
 	
@@ -207,13 +226,15 @@ function venueModule() {
 			} else {
 				// callback should be getVenuesFromDB with USER_SEARCH_RADIUS
 				// after the new venues have been added to our db (counter == ids.length)
-				console.log("Executing callback for last venue");
+				isAddingVenuesToDB = false
+				console.log("Executing callback after adding last venue");
 				callback();
 			}
 		}
 		
 		// get venues/place_ids in a circle around lat, lng
 		console.log("Scanning Google Places for venues...");
+		isAddingVenuesToDB = true;
 		GoogleImport.getVenues(lat, lng, function(ids){
 			
 			console.log("Received venues. Add search to db...");
@@ -227,12 +248,6 @@ function venueModule() {
 				});
 			});
 		});
-		
-		// if not, request venue details and insert them into db
-		// GoogleImport.getVenues(lat, lng, function(result){
-			// query = "";
-			// database.connection.query
-		// });
 	};
 	
 	that.checkSearches = function(lat, lng, circles){
@@ -289,9 +304,13 @@ function venueModule() {
 		
 		console.log("Request for venues around lat: " + lat + ", lng: " + lng);
 		
-		that.searchForVenues(lat, lng, function(venues){
-			res.send(200, venues);
-		});
+		if(!isAddingVenuesToDB)
+			that.searchForVenues(lat, lng, function(venues){
+				res.send(200, venues);
+			});
+		else
+			res.send(202, {status: "Updating database"});
+		
 		return next();
 	};
 	
@@ -300,8 +319,11 @@ function venueModule() {
 		
 		console.log("Request for venue with id: " + tmp);
 		
-		that.findVenue(id, function(venue){
-			res.send(200, venue);
+		that.findVenue(tmp, function(venue){
+			if(venue != null)
+				res.send(200, venue);
+			else
+				res.send(404, "Venue not found");
 		});
 		return next();
 	};

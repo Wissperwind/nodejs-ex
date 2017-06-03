@@ -38,7 +38,7 @@ function GoogleImporter(){
 	
 	that.getVenues = function(lat, lng, callback){
 		
-		// typestr: restaurant or bar or ... (see Google)
+		// typestr: 'restaurant' or 'bar' or ... (see Google Places -> Types)
 		function searchVenues(lat, lng, typestr){
 		
 			var options = {
@@ -50,29 +50,44 @@ function GoogleImporter(){
 					radius: that.SEARCH_RADIUS,
 					type: typestr
 				}
-				// TODO: How to include more types? We don't want restaurants exclusively, but also cafés, bars etc.
-				// Maybe do more searches in the callbacks!
 			};
 			return options;
 		}
-		
-		request(searchVenues(lat, lng, 'restaurant'), function(err, res, body){
-			var ids = [];
-			if(!err && res.statusCode == 200){
-				var locations = JSON.parse(body);
-				if(locations.status == "OK"){
-					for (var i = 0; i < locations.results.length; i++) {
-						ids[i] = locations.results[i].place_id;
-						console.log(ids[i]);
+	
+		function processVenues(callback){ 
+			return function(err, res, body){
+				var ids = [];
+				if(!err && res.statusCode == 200){
+					var venues = JSON.parse(body);
+					if(venues.status == "OK"){
+						for (var i = 0; i < venues.results.length; i++) {
+							ids.push(venues.results[i].place_id);
+							console.log(ids[i]);
+						}
+						callback(ids);
+					} else {
+						console.log(venues.status);
+						callback(ids);
 					}
-					callback(ids);
 				} else {
-					console.log(locations.status);
+					console.log("Status Code: " + res.statusCode);
+					callback(ids);
 				}
-			} else {
-				console.log("Status Code: " + res.statusCode);
-			}
-		});
+			};
+		}
+		
+		var locations = []
+		
+		request(searchVenues(lat, lng, 'restaurant'), processVenues(function(restaurants){
+			request(searchVenues(lat, lng, 'bar'), processVenues(function(bars){
+				request(searchVenues(lat, lng, 'cafe'), processVenues(function(cafes){
+					request(searchVenues(lat, lng, 'night_club'), processVenues(function(clubs){
+						locations = locations.concat(restaurants, bars, cafes, clubs);
+						callback(locations);						
+					}));
+				}));
+			}));
+		}));
 	};
 }
 
