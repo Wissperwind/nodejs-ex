@@ -249,7 +249,7 @@ function venueModule() {
 				// if it is not, fetch and add the details belonging to place_id to our database
 				if(!idInDB){
 					console.log("Found a venue that is not in db; ID: " + ids[counter]);
-					console.log("Retrieving details for venue with ID: " + ids[counter]);
+					//console.log("Retrieving details for venue with ID: " + ids[counter]);
 					
 					GoogleImport.getVenueDetails(ids[counter], function(details){
 						that.createVenue(details, function(venue){
