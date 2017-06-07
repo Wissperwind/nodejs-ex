@@ -119,7 +119,15 @@ function venueModule() {
 	that.createVenue = function(venue, callback) {
 		
 		console.log("Create venue in city: "+venue.vicinity.split(", ")[1]);
-		that.getCityID(venue.vicinity.split(", ")[1], function(cityID){
+		//that.getCityID(venue.vicinity.split(", ")[1], function(cityID){ // doesn't work vor every venue
+		var cityName = "undefined";
+		for(var i=0; i<venue.address_components.length;i++){
+			if(venue.address_components[i].types.indexOf("locality") > -1){
+				cityName = venue.address_components[i].long_name;
+				break;
+			}
+		}
+		that.getCityID(cityName, function(cityID){
 			var weekdayStr = "";
 			if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
 				for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
