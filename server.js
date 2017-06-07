@@ -24,7 +24,8 @@ server.post('/signup', loginModule.signUp);
 server.post({url:'/login'}, loginModule.loginRoute);
 server.get({url:'/hello'}, loginModule.helloRoute);
 
-server.get('venues/position/:latlng',	venueModule.getVenues); // latlng should be "lat,lng", split did not work with #
+//server.get('venues/position/:latlng',	venueModule.getVenues); // deprecated; latlng should be "lat,lng", split did not work with #
+server.get('venues',					venueModule.getVenues); // expected: venues?lat=<...>&lng=<...>
 server.get('venues/:id',				venueModule.getVenue);
 
 /* server.listen(3000, function(){

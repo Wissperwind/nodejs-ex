@@ -11,7 +11,7 @@ function venueModule() {
 	// meters; for the mobile application, so all venues in our db in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	// how large should our radius be?
 	
-	var isAddingVenuesToDB = false;
+	//var isAddingVenuesToDB = false;
 	
 	function getDistanceInMeters(lat1, lon1, lat2, lon2){
 		var radius = 6378137; // (equatorial) earth radius in meters
@@ -55,9 +55,24 @@ function venueModule() {
 		function(err, result){
 			if(!err) {
 				console.log("Inserted search location into db: lat: " + lat + ", lng: " + lng);
-				callback(null);
+				callback(result.insertId);
 			} else {
 				console.log("Error trying to insert search location into database");
+				console.log(err);
+				callback(null);
+			}
+		});
+	};
+	
+	that.updateSearchComplete = function(id, callback) {
+		query = "UPDATE scanned_locations SET isComplete=1 WHERE id=?";
+		database.connection.query(
+		query,[id],function(err, result){
+			if(!err) {
+				console.log("Updated search location with id: "+id);
+				callback(id);
+			} else {
+				console.log("Error trying to update search location with id: "+id);
 				console.log(err);
 				callback(null);
 			}
@@ -141,7 +156,7 @@ function venueModule() {
 	};
 	
 	// low detail response for list and display on map
-	that.getVenuesFromDB = function(lat, lng, dist, callback){
+	that.getVenuesFromDB = function(lat, lng, dist, idOnly, callback){
 		// TODO: query seems to be a square, maybe change to circle
 		database.connection.query("SELECT * FROM venues WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?",
 		[that.getLatLon(lat, lng, dist, 180)[0], that.getLatLon(lat, lng, dist, 0)[0], that.getLatLon(lat, lng, dist, 270)[1], that.getLatLon(lat, lng, dist, 90)[1]],
@@ -153,12 +168,15 @@ function venueModule() {
 					console.log("Venue ID: " + rows[i].id);
 					venue = {};
 					// What should go into our response?
-					venue.id = rows[i].id;
-					venue.google_id = rows[i].google_id;
-					venue.lat = rows[i].lat;
-					venue.lng = rows[i].lng;
-					venue.name = rows[i].name;
-					venue.address = rows[i].address;
+					if(idOnly)
+						venue.google_id = rows[i].google_id;
+					else {
+						venue.id = rows[i].id;
+						venue.lat = rows[i].lat;
+						venue.lng = rows[i].lng;
+						venue.name = rows[i].name;
+						venue.address = rows[i].address;
+					}
 					
 					venues.push(venue);
 				}
@@ -166,6 +184,7 @@ function venueModule() {
 				callback(venues);
 			} else {
 				console.log("Error querying db for venues");
+				callback(null);
 			}
 		});
 	};
@@ -198,19 +217,25 @@ function venueModule() {
 		});
 	};
 	
-	that.importVenuesFromGoogle = function(lat, lng, callback){
+	//that.importVenuesFromGoogle = function(lat, lng, callback){
+	that.importVenuesFromGoogle = function(lat, lng){
 		
-		function importAndUpload(ids, venues, counter, callback){
+		//function importAndUpload(ids, venues, counter, searchId, callback){
+		function importAndUpload(ids, venues, counter, searchId){
 			var idInDB = false;
 			if(counter < ids.length){
 				// check if place_id is already in db
 				if(!that.isResponseEmpty(venues)){
 					for(var j=0; j<venues.length; j++){
 						if(ids[counter] == venues[j].google_id){
+							//console.log(venues);
+							console.log("ID " + ids[counter] + " is in DB");
+							venues.splice(j, 1);
 							idInDB = true;
 							break;
 						}
 					}
+					importAndUpload(ids, venues, counter+1, searchId);
 				}
 				
 				// if it is not, fetch and add the details belonging to place_id to our database
@@ -220,32 +245,37 @@ function venueModule() {
 					
 					GoogleImport.getVenueDetails(ids[counter], function(details){
 						that.createVenue(details, function(venue){
-							importAndUpload(ids, venues, counter+1, callback);
+							//importAndUpload(ids, venues, counter+1, callback);
+							importAndUpload(ids, venues, counter+1, searchId);
 						});
 					});
 				}
 			} else {
 				// callback should be getVenuesFromDB with USER_SEARCH_RADIUS
 				// after the new venues have been added to our db (counter == ids.length)
-				isAddingVenuesToDB = false
-				console.log("Executing callback after adding last venue");
-				callback();
+				//isAddingVenuesToDB = false
+				console.log("Search " + searchId + " is complete");
+				that.updateSearchComplete(searchId, function(id){
+					//console.log("Executing callback after adding last venue");
+					//callback();
+				});
 			}
 		}
 		
 		// get venues/place_ids in a circle around lat, lng
 		console.log("Scanning Google Places for venues...");
-		isAddingVenuesToDB = true;
+		//isAddingVenuesToDB = true;
 		GoogleImport.getVenues(lat, lng, function(ids){
 			
 			console.log("Received venues. Add search to db...");
-			that.addSearch(lat, lng, function(foo){
+			that.addSearch(lat, lng, function(searchId){
 			
 				console.log("Added search to db. Comparing Google's venues to venues in db...");
 				
-				that.getVenuesFromDB(lat, lng, GoogleImport.SEARCH_RADIUS, function(venues){
+				that.getVenuesFromDB(lat, lng, GoogleImport.SEARCH_RADIUS, true, function(venues){
 					var i = 0;
-					importAndUpload(ids, venues, i, callback);
+					//importAndUpload(ids, venues, i, searchId, callback);
+					importAndUpload(ids, venues, i, searchId);
 				});
 			});
 		});
@@ -286,9 +316,21 @@ function venueModule() {
 				if(!err){
 					var needScan = that.checkSearches(lat, lng, locations);
 					if(needScan){
-						that.importVenuesFromGoogle(lat, lng, function(){that.getVenuesFromDB(lat, lng, USER_SEARCH_RADIUS, callback);});
+						//that.importVenuesFromGoogle(lat, lng, function(){that.getVenuesFromDB(lat, lng, USER_SEARCH_RADIUS, callback);});
+						that.importVenuesFromGoogle(lat, lng);
+						callback(null); // if no search was found, user should be told and venues scanned from Google
 					} else {
-						that.getVenuesFromDB(lat, lng, USER_SEARCH_RADIUS, callback);
+						var completeSearch = false;
+						for(var i=0; i<locations.length;i++){
+							if(locations[i].isComplete != 0){
+								completeSearch = true;
+								break;
+							}
+						}
+						if(completeSearch)
+							that.getVenuesFromDB(lat, lng, USER_SEARCH_RADIUS, false, callback); // if a complete search was found, retrieve venues
+						else
+							callback([]);// if no complete search was found, user should be told to wait
 					}
 				} else {
 					console.log("Error querying db for previous searches");
@@ -299,18 +341,36 @@ function venueModule() {
 	};
 	
 	that.getVenues = function(req, res, next){
-		var tmp = req.params.latlng.split(",");
+/* 		var tmp = req.params.latlng.split(",");
 		var lat = tmp[0];
-		var lng = tmp[1];
+		var lng = tmp[1]; */
+		
+		var lat = req.params.lat;
+		var lng = req.params.lng;
+		
+		if(!(lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)){
+			res.send(400, "lat and/or lng not in bounds or undefined");
+			return next();
+		}
+		
+		//testing
+		// res.send(200, "Test succesful");
+		// return next();
 		
 		console.log("Request for venues around lat: " + lat + ", lng: " + lng);
 		
-		if(!isAddingVenuesToDB)
-			that.searchForVenues(lat, lng, function(venues){
-				res.send(200, venues);
-			});
-		else
-			res.send(202, {status: "Updating database"});
+		//if(!isAddingVenuesToDB)
+		that.searchForVenues(lat, lng, function(venues){
+			if(venues != null) {
+				if(venues.length > 0)
+					res.send(200, venues);
+				else
+					res.send(202, "Server is adding venues to database");
+			} else
+				res.send(404, "No venues found right now");	// 
+		});
+		//else
+			//res.send(202, {status: "Updating database"});
 		
 		return next();
 	};
