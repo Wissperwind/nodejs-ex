@@ -173,7 +173,7 @@ function venueModule() {
 				var venues = [];
 				var venue;
 				for(var i=0; i<rows.length; i++){
-					console.log("Venue ID: " + rows[i].id);
+					//console.log("Venue ID: " + rows[i].id);
 					venue = {};
 					// What should go into our response?
 					if(idOnly)
@@ -238,12 +238,12 @@ function venueModule() {
 						if(ids[counter] == venues[j].google_id){
 							//console.log(venues);
 							console.log("ID " + ids[counter] + " is in DB");
-							venues.splice(j, 1);
+							venues.splice(j, 1); //remove venue to fasten up comparison
 							idInDB = true;
 							break;
 						}
 					}
-					importAndUpload(ids, venues, counter+1, searchId);
+					//importAndUpload(ids, venues, counter+1, searchId); // NOT HERE!
 				}
 				
 				// if it is not, fetch and add the details belonging to place_id to our database
@@ -257,6 +257,8 @@ function venueModule() {
 							importAndUpload(ids, venues, counter+1, searchId);
 						});
 					});
+				} else {
+					importAndUpload(ids, venues, counter+1, searchId);
 				}
 			} else {
 				// callback should be getVenuesFromDB with USER_SEARCH_RADIUS
