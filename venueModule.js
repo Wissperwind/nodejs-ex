@@ -118,15 +118,33 @@ function venueModule() {
 	
 	that.createVenue = function(venue, callback) {
 		
-		console.log("Create venue in city: "+venue.vicinity.split(", ")[1]);
+		function addVenueTypes(id, types, counter, callback){
+			if(counter<types.length){
+				database.connection.query("INSERT INTO venuekind SET venue_id=?, type=?", [id, types[counter]], function(err, result){
+					if(!err) {
+						console.log("Added type " + types[counter] + " to venue " + id +" into db");
+						addVenueTypes(id, types, counter+1, callback);
+					} else {
+						console.log("Error trying to add type for venue " + id);
+						console.log(err);
+						addVenueTypes(id, types, counter+1, callback);
+					}
+				});
+			} else {
+				callback();
+			}
+		}
+		
+		//console.log("Create venue in city: "+venue.vicinity.split(", ")[1]);
 		//that.getCityID(venue.vicinity.split(", ")[1], function(cityID){ // doesn't work vor every venue
-		var cityName = "undefined";
+		var cityName = "Somewhere";
 		for(var i=0; i<venue.address_components.length;i++){
 			if(venue.address_components[i].types.indexOf("locality") > -1){
 				cityName = venue.address_components[i].long_name;
 				break;
 			}
 		}
+		console.log("Create venue in city: "+cityName);
 		that.getCityID(cityName, function(cityID){
 			var weekdayStr = "";
 			if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
@@ -153,7 +171,8 @@ function venueModule() {
 			function(err, result){
 				if(!err) {
 					console.log("Inserted venue into db: " + result.insertId);
-					callback(venue);
+					addVenueTypes(result.insertId, venue.types, 0, function(){callback(venue);});
+					//callback(venue);
 				} else {
 					console.log("Error trying to insert venue into database");
 					console.log(err);
