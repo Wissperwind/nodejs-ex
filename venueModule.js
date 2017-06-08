@@ -137,49 +137,52 @@ function venueModule() {
 		
 		//console.log("Create venue in city: "+venue.vicinity.split(", ")[1]);
 		//that.getCityID(venue.vicinity.split(", ")[1], function(cityID){ // doesn't work vor every venue
-		var cityName = "Somewhere";
-		for(var i=0; i<venue.address_components.length;i++){
-			if(venue.address_components[i].types.indexOf("locality") > -1){
-				cityName = venue.address_components[i].long_name;
-				break;
-			}
-		}
-		console.log("Create venue in city: "+cityName);
-		that.getCityID(cityName, function(cityID){
-			var weekdayStr = "";
-			if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
-				for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
-					weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + ",";
+		if(venue != null){
+			var cityName = "Somewhere";
+			for(var i=0; i<venue.address_components.length;i++){
+				if(venue.address_components[i].types.indexOf("locality") > -1){
+					cityName = venue.address_components[i].long_name;
+					break;
 				}
 			}
-		
-			query = "INSERT INTO venues SET google_id=?, lat=?, lng=?, name=?, city=?, address=?, phone=?, website=?, weekday_text=?, price_level=?, icon=?";
-			database.connection.query( query,
-			[
-				venue.place_id,
-				venue.geometry.location.lat,
-				venue.geometry.location.lng,
-				venue.name,
-				cityID,
-				venue.vicinity,
-				venue.international_phone_number,
-				venue.website,
-				weekdayStr,
-				venue.price_level,
-				venue.icon
-			],
-			function(err, result){
-				if(!err) {
-					console.log("Inserted venue into db: " + result.insertId);
-					addVenueTypes(result.insertId, venue.types, 0, function(){callback(venue);});
-					//callback(venue);
-				} else {
-					console.log("Error trying to insert venue into database");
-					console.log(err);
-					callback(null);
+			console.log("Create venue in city: "+cityName);
+			that.getCityID(cityName, function(cityID){
+				var weekdayStr = "";
+				if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
+					for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
+						weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + ",";
+					}
 				}
+			
+				query = "INSERT INTO venues SET google_id=?, lat=?, lng=?, name=?, city=?, address=?, phone=?, website=?, weekday_text=?, price_level=?, icon=?";
+				database.connection.query( query,
+				[
+					venue.place_id,
+					venue.geometry.location.lat,
+					venue.geometry.location.lng,
+					venue.name,
+					cityID,
+					venue.vicinity,
+					venue.international_phone_number,
+					venue.website,
+					weekdayStr,
+					venue.price_level,
+					venue.icon
+				],
+				function(err, result){
+					if(!err) {
+						console.log("Inserted venue into db: " + result.insertId);
+						addVenueTypes(result.insertId, venue.types, 0, function(){callback(venue);});
+						//callback(venue);
+					} else {
+						console.log("Error trying to insert venue into database");
+						console.log(err);
+						callback(null);
+					}
+				});
 			});
-		});
+		} else
+			callback(null);
 	};
 	
 	// low detail response for list and display on map
@@ -374,34 +377,60 @@ function venueModule() {
 		var lat = tmp[0];
 		var lng = tmp[1]; */
 		
-		var lat = req.params.lat;
-		var lng = req.params.lng;
+		function doSearch(lat, lng){
 		
-		if(!(lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)){
-			res.send(400, "lat and/or lng not in bounds or undefined");
+			if(!(lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)){
+				res.send(400, "lat and/or lng not in bounds or undefined");
+				return next();
+			}
+			
+			//testing
+			// res.send(200, "Test succesful");
+			// return next();
+			
+			console.log("Request for venues around lat: " + lat + ", lng: " + lng);
+			
+			//if(!isAddingVenuesToDB)
+			that.searchForVenues(lat, lng, function(venues){
+				if(venues != null) {
+					if(venues.length > 0)
+						res.send(200, venues);
+					else
+						res.send(202, "Server is adding venues to database");
+				} else
+					res.send(404, "No venues found right now");	// 
+			});
+			//else
+				//res.send(202, {status: "Updating database"});
+			
 			return next();
+			
 		}
 		
-		//testing
-		// res.send(200, "Test succesful");
-		// return next();
+		var lat;
+		var lng;
 		
-		console.log("Request for venues around lat: " + lat + ", lng: " + lng);
-		
-		//if(!isAddingVenuesToDB)
-		that.searchForVenues(lat, lng, function(venues){
-			if(venues != null) {
-				if(venues.length > 0)
-					res.send(200, venues);
-				else
-					res.send(202, "Server is adding venues to database");
-			} else
-				res.send(404, "No venues found right now");	// 
-		});
-		//else
-			//res.send(202, {status: "Updating database"});
-		
-		return next();
+		if("lat" in req.params && "lng" in req.params){
+			lat = req.params.lat;
+			lng = req.params.lng;
+			doSearch(lat, lng);
+		} else if("city" in req.params){
+			GoogleImport.convertToLatLng(req.params.city, function(ll){
+				if(ll != null){
+					lat = ll.lat;
+					lng = ll.lng;
+					doSearch(lat, lng);
+				} else {
+					console.log("Could not convert city to coordinates");
+					res.send(500, "Could not convert city to coordinates")
+					return next();
+				}
+			});
+		} else {
+			console.log("Request without search criteria received");
+			res.send(400, "lat=...&lng=... or city=...")
+			return next();
+		}
 	};
 	
 	that.getVenue = function(req, res, next){

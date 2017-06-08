@@ -8,6 +8,35 @@ function GoogleImporter(){
 	
 	const request = require('request');
 	
+	that.convertToLatLng = function(str, callback){
+		
+		var options = {
+			method: 'GET',
+			uri: "https://maps.googleapis.com/maps/api/geocode/json",
+			qs: {
+				key: GOOGLE_KEY,
+				address: str
+			}
+		};
+		
+		console.log("Convert " + str + " to lat. and lng.");
+		request(options, function(err, res, body){
+			if(!err && res.statusCode == 200){
+				var loc = JSON.parse(body);
+				if(loc.status == "OK"){
+					console.log("Coordinates of " + str + " are: " + loc.results[0].geometry.location.lat + "," + loc.results[0].geometry.location.lng);
+					callback(loc.results[0].geometry.location); // object with lat:..., lng:...
+				} else {
+					console.log(loc.status);
+					callback(null);
+				}
+			} else {
+				console.log("Status Code: " + res.statusCode);
+				callback(null);
+			}
+		});
+	}
+	
 	that.getVenueDetails = function(id, callback){
 		
 		var options = {
@@ -28,9 +57,11 @@ function GoogleImporter(){
 					callback(details.result);
 				} else {
 					console.log(details.status);
+					callback(null);
 				}
 			} else {
 				console.log("Status Code: " + res.statusCode);
+				callback(null);
 			}
 			
 		});
