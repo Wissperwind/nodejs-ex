@@ -25,8 +25,9 @@ server.post({url:'/login'}, loginModule.loginRoute);
 server.get({url:'/hello'}, loginModule.helloRoute);
 
 //server.get('venues/position/:latlng',	venueModule.getVenues); // deprecated; latlng should be "lat,lng", split did not work with #
-server.get('venues',					venueModule.getVenues); // expected: venues?lat=<...>&lng=<...> or venues?city=...
-server.get('venues/:id',				venueModule.getVenue);
+//server.get('venues',					venueModule.getVenues); // expected: venues?lat=<...>&lng=<...> or venues?city=...
+server.post('venues',		venueModule.getVenues); //expected object keys: lat:..., lng:... | city:...
+server.get('venues/:id',	venueModule.getVenue);
 
 /* server.listen(3000, function(){
     console.log('%s is listening at %s', server.name, server.url);
