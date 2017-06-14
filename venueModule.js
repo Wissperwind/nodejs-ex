@@ -441,7 +441,7 @@ function venueModule() {
 					else if(venues.length > 0)
 						res.send(200, {venues: venues});
 					else
-						res.send(404, "No venues found.");
+						res.send(404, {venues: []});
 				} else
 					res.send(404, "No venues found in the database. Server starts importing.");	// 
 			});
