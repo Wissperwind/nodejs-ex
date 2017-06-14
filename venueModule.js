@@ -235,6 +235,8 @@ function venueModule() {
 						venue.name = rows[i].name;
 						venue.address = rows[i].address;
 						venue.iconURL = rows[i].icon;
+						venue.categories = rows[i].type;
+						venue.rating = rows[i].rating;
 					}
 					
 					venues.push(venue);
