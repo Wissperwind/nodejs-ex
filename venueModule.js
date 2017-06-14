@@ -393,7 +393,7 @@ function venueModule() {
 						if(completeSearch)
 							that.getVenuesFromDB(lat, lng, USER_SEARCH_RADIUS, options, callback); // if a complete search was found, retrieve venues
 						else
-							callback([]);// if no complete search was found, user should be told to wait
+							callback("searching");// if no complete search was found, user should be told to wait
 					}
 				} else {
 					console.log("Error querying DB for previous searches");
@@ -435,12 +435,14 @@ function venueModule() {
 			//if(!isAddingVenuesToDB)
 			that.searchForVenues(lat, lng, options, function(venues){
 				if(venues != null) {
-					if(venues.length > 0)
+					if(venues == "searching")
+						res.send(202, "Server is adding venues to the database. Please try again later.");
+					else if(venues.length > 0)
 						res.send(200, venues);
 					else
-						res.send(202, "Server is adding venues to database");
+						res.send(404, "No venues found.");
 				} else
-					res.send(404, "No venues found right now");	// 
+					res.send(404, "No venues found in the database. Server starts importing.");	// 
 			});
 			//else
 				//res.send(202, {status: "Updating database"});
