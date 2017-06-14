@@ -438,7 +438,7 @@ function venueModule() {
 					if(venues == "searching")
 						res.send(202, "Server is adding venues to the database. Please try again later.");
 					else if(venues.length > 0)
-						res.send(200, venues);
+						res.send(200, {venues: venues});
 					else
 						res.send(404, "No venues found.");
 				} else
