@@ -237,6 +237,7 @@ function venueModule() {
 						venue.iconURL = rows[i].icon;
 						venue.categories = rows[i].type;
 						venue.rating = rows[i].rating;
+						venue.imageURL = rows[i].icon;
 					}
 					
 					venues.push(venue);
