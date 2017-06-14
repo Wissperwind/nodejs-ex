@@ -234,6 +234,7 @@ function venueModule() {
 						venue.lng = rows[i].lng;
 						venue.name = rows[i].name;
 						venue.address = rows[i].address;
+						venue.iconURL = rows[i].icon;
 					}
 					
 					venues.push(venue);
