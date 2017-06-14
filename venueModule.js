@@ -437,13 +437,13 @@ function venueModule() {
 			that.searchForVenues(lat, lng, options, function(venues){
 				if(venues != null) {
 					if(venues == "searching")
-						res.send(202, "Server is adding venues to the database. Please try again later.");
+						res.send(202, {venues: [], status: "adding venues"});
 					else if(venues.length > 0)
-						res.send(200, {venues: venues});
+						res.send(200, {venues: venues, status: "successful"});
 					else
-						res.send(404, {venues: []});
+						res.send(404, {venues: [], status: "no venues found"});
 				} else
-					res.send(404, "No venues found in the database. Server starts importing.");	// 
+					res.send(404, {venues: [], status: "adding venues"});	// 
 			});
 			//else
 				//res.send(202, {status: "Updating database"});
