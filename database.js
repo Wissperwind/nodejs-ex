@@ -4,20 +4,20 @@ function dbConnection() {
 	
 	var that = this;
 	
-	that.connection = mysql.createConnection({
+/* 	that.connection = mysql.createConnection({
 			'host' 		: 'sql11.freemysqlhosting.net',
 			'user'		: 'sql11175021',
 			'password'	: 'fXIz3dRIpx',
 			'database'	: 'sql11175021'		
-		});	
+		});	 */
 
 // for local testing
-/* 	that.connection = mysql.createConnection({
+	that.connection = mysql.createConnection({
 			'host' 		: 'localhost',
 			'user'		: 'root',
 			'password'	: '',
-			'database'	: 'iptk'		
-		});	 */
+			'database'	: 'iptk_0608'		
+		});	
 	
 	that.connect = function(){
 		that.connection.connect( function(err) {
