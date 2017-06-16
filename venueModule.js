@@ -5,13 +5,12 @@ function venueModule() {
 	var that = this;
 
 	var database = require('./database');
+	var cityModule = require('./cityModule');
 	var GoogleImport = require('./GoogleImport');
 	const USER_SEARCH_RADIUS = 1000;
 	//const USER_SEARCH_RADIUS = 400; //for testing
 	// meters; for the mobile application, so all venues in our DB in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	// how large should our radius be?
-	
-	//var isAddingVenuesToDB = false;
 	
 	function getDistanceInMeters(lat1, lon1, lat2, lon2){
 		var radius = 6378137; // (equatorial) earth radius in meters
@@ -79,43 +78,6 @@ function venueModule() {
 		});
 	};
 	
-	that.addCity = function(name, callback){
-		database.connection.query("INSERT INTO cities SET name=?", [name], function(err, result){
-			if(!err) {
-				console.log("Inserted city " + name + " into DB with id: " + result.insertId);
-				var city = {};
-				city.id = result.insertId;
-				city.name = name;
-				callback(city);
-			} else {
-				console.log("Error trying to insert city into database");
-				console.log(err);
-				callback(null);
-			}
-		});
-	};
-	
-	that.getCityID = function(name, callback){
-		console.log("Getting ID for city: "+name);
-		database.connection.query("SELECT * FROM cities WHERE name=?", [name], function(err, rows, fields){
-			if(!err){
-				for(var i=0; i<rows.length; i++){
-					console.log("Found city " + name + " with ID: " + rows[i].id);
-					callback(rows[i].id);
-				}
-				if(i == 0){
-					console.log("Adding city to DB...");
-					that.addCity(name, function(city){
-						callback(city.id);
-					});
-				}
-			} else {
-				console.log("Could not get city ID");
-				console.log(err);
-			}
-		});
-	};
-	
 	that.createVenue = function(venue, callback) {
 		
 		function addVenueTypes(id, types, counter, callback){
@@ -135,8 +97,6 @@ function venueModule() {
 			}
 		}
 		
-		//console.log("Create venue in city: "+venue.vicinity.split(", ")[1]);
-		//that.getCityID(venue.vicinity.split(", ")[1], function(cityID){ // doesn't work vor every venue
 		if(venue != null){
 			var cityName = "Somewhere";
 			for(var i=0; i<venue.address_components.length;i++){
@@ -146,7 +106,7 @@ function venueModule() {
 				}
 			}
 			console.log("Create venue in city: "+cityName);
-			that.getCityID(cityName, function(cityID){
+			cityModule.getCityID(cityName, function(cityID){
 				var weekdayStr = "";
 				if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
 					for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
@@ -193,31 +153,15 @@ function venueModule() {
 		
 		console.log("Getting venues between " +that.getLatLon(lat, lng, dist, 180)[0]+","+that.getLatLon(lat, lng, dist, 270)[1]+" and "+that.getLatLon(lat, lng, dist, 0)[0]+","+that.getLatLon(lat, lng, dist, 90)[1]);
 		
-		// switch(options.type){
-// /* 			case "allById":
-				// qstr = "SELECT * FROM venues WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?";
-				// break; */
-			// case "keyword":
-				// qstr = 
-				// break;
-			// case "category":
-				
-				// break;
-			// default:
-				// qstr = "SELECT * FROM venues WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?";
-		// }
-		
 		if("keyword" in options){
-			qstr = "SELECT venues.*,venuekind.type FROM venues RIGHT JOIN venuekind ON (venues.id = venuekind.venue_id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND (name LIKE ? OR type LIKE ?) GROUP BY id";
-			qarr.push("%" + options.keyword + "%"); qarr.push("%" + options.keyword + "%");
+			qstr = "SELECT venues.*,categories FROM venues RIGHT JOIN (venuekind RIGHT JOIN (SELECT venuekind.venue_id,GROUP_CONCAT(venuekind.type SEPARATOR ', ') AS categories FROM venuekind GROUP BY venuekind.venue_id) AS tmp USING (venue_id)) ON (venue_id = venues.id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND (name LIKE ? OR type LIKE ?) GROUP BY id";
+			qarr.push("%" + options.keyword + "%"); qarr.push(options.keyword);
 		} else if("category" in options){
 			qstr = "SELECT venues.*,venuekind.type FROM venues RIGHT JOIN venuekind ON (venues.id = venuekind.venue_id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND type LIKE ? GROUP BY id";
 			qarr.push(options.category);
 		}
 		
 		// TODO: query seems to be a square, maybe change to circle
-		//database.connection.query("SELECT * FROM venues WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?",
-		//[that.getLatLon(lat, lng, dist, 180)[0], that.getLatLon(lat, lng, dist, 0)[0], that.getLatLon(lat, lng, dist, 270)[1], that.getLatLon(lat, lng, dist, 90)[1]],
 		database.connection.query(qstr, qarr, function(err, rows, field){
 			if(!err){
 				var venues = [];
@@ -234,9 +178,9 @@ function venueModule() {
 						venue.lng = rows[i].lng;
 						venue.name = rows[i].name;
 						venue.address = rows[i].address;
-						venue.iconURL = rows[i].icon;
-						venue.categories = rows[i].type;
+						venue.categories = rows[i].categories;
 						venue.rating = rows[i].rating;
+						venue.iconURL = rows[i].icon;
 						venue.imageURL = rows[i].icon;
 					}
 					
