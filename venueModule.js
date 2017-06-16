@@ -107,8 +107,9 @@ function venueModule() {
 			}
 			console.log("Create venue in city: "+cityName);
 			cityModule.getCityID(cityName, function(cityID){
-				var weekdayStr = "";
+				var weekdayStr = "Missing opening hours";
 				if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
+					weekdayStr = "";
 					for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
 						weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + ",";
 					}
@@ -123,10 +124,10 @@ function venueModule() {
 					venue.name,
 					cityID,
 					venue.vicinity,
-					venue.international_phone_number,
-					venue.website,
+					venue.international_phone_number ? venue.international_phone_number : "Missing phone number",
+					venue.website ? venue.website : "Missing website",
 					weekdayStr,
-					venue.price_level,
+					venue.price_level ? venue.price_level : "Missing price level",
 					venue.icon
 				],
 				function(err, result){
@@ -175,7 +176,7 @@ function venueModule() {
 					else {
 						venue.id = rows[i].id;
 						venue.lat = rows[i].lat;
-						venue.lng = rows[i].lng;
+						venue.long = rows[i].lng;
 						venue.name = rows[i].name;
 						venue.address = rows[i].address;
 						venue.categories = rows[i].categories;
@@ -204,14 +205,17 @@ function venueModule() {
 					var venue = {
 						id:	rows[i].id,
 						name: rows[i].name,
-						lat: rows[i].lat,
-						lng: rows[i].lng,
-						address: rows[i].address,
-						phone: rows[i].phone,
-						website: rows[i].website,
-						weekday_text: rows[i].weekday_text,
+						location: {lat: rows[i].lat, long: rows[i].lng},
 						rating: rows[i].rating,
-						price_level: rows[i].price_level
+						longdescription: ""+rows[i].address,
+						images: [],
+						comments:[],
+						topvisitors: []
+						//address: rows[i].address,
+						//phone: rows[i].phone,
+						//website: rows[i].website,
+						//weekday_text: rows[i].weekday_text,
+						//price_level: rows[i].price_level
 					};
 					callback(venue);
 					return;
