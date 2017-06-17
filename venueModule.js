@@ -6,6 +6,7 @@ function venueModule() {
 
 	var database = require('./database');
 	var cityModule = require('./cityModule');
+	var commentModule = require('./commentModule');
 	var GoogleImport = require('./GoogleImport');
 	const USER_SEARCH_RADIUS = 1000;
 	//const USER_SEARCH_RADIUS = 400; //for testing
@@ -189,41 +190,44 @@ function venueModule() {
 				}
 				console.log(venues);
 				callback(venues);
+				return;
 			} else {
 				console.log("Error querying DB for venues");
-				callback(null);
 			}
+			callback(null);
 		});
 	};
 	
 	// high detail response for venue window
 	that.findVenue = function(id, callback){
-		database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
-			if(!err){
-				for(var i=0; i<rows.length; i++){
-					console.log("Found venue: " + rows[i].name);
-					var venue = {
-						id:	rows[i].id,
-						name: rows[i].name,
-						location: {lat: rows[i].lat, long: rows[i].lng},
-						rating: rows[i].rating,
-						longdescription: ""+rows[i].address,
-						images: [],
-						comments:[],
-						topvisitors: []
-						//address: rows[i].address,
-						//phone: rows[i].phone,
-						//website: rows[i].website,
-						//weekday_text: rows[i].weekday_text,
-						//price_level: rows[i].price_level
-					};
-					callback(venue);
-					return;
+		commentModule.getCommentsByVenue(id, function(comments){
+			database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
+				if(!err){
+					for(var i=0; i<rows.length; i++){
+						console.log("Found venue: " + rows[i].name);
+						var venue = {
+							id:	rows[i].id,
+							name: rows[i].name,
+							location: {lat: rows[i].lat, long: rows[i].lng},
+							rating: rows[i].rating,
+							longdescription: ""+rows[i].address,
+							images: [],
+							comments: comments,
+							topvisitors: []
+							//address: rows[i].address,
+							//phone: rows[i].phone,
+							//website: rows[i].website,
+							//weekday_text: rows[i].weekday_text,
+							//price_level: rows[i].price_level
+						};
+						callback(venue);
+						return;
+					}
+				} else {
+					console.log("Error querying DB for venue")
 				}
-			} else {
-				console.log("Error querying DB for venue")
-			}
-			callback(null);
+				callback(null);
+			});
 		});
 	};
 	
