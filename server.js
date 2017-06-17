@@ -3,6 +3,7 @@ var database = require('./database');
 var venueModule = require('./venueModule');
 var userModule = require('./userModule');
 var commentModule = require('./commentModule');
+var photoModule = require('./photoModule');
 
 const port = 8080;
 
@@ -39,5 +40,6 @@ server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
+	console.log('Photos are in %s', photoModule.photoDir);
 	database.connect();
 });
