@@ -40,6 +40,7 @@ server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
+	console.log(process.env.OPENSHIFT_DATA_DIR);
 	console.log('Photos are in %s', photoModule.photoDir);
 	database.connect();
 });
