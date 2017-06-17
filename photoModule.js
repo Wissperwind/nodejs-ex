@@ -1,6 +1,5 @@
 function photoModule(){
 	
-	console.log(fs.readdirSync("/data"));
 	
 	var that = this;
 	
@@ -8,6 +7,7 @@ function photoModule(){
 	
 	//that.photoDir = process.env.OPENSHIFT_DATA_DIR; //does not work...
 	that.photoDir = fs.readdirSync("");
+	console.log("data folder: "+fs.readdirSync("/data"));
 }
 
 module.exports = new photoModule();
