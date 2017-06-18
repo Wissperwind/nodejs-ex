@@ -6,8 +6,9 @@ function photoModule(){
 	var fs = require('fs');
 	
 	//that.photoDir = process.env.OPENSHIFT_DATA_DIR; //does not work...
-	that.photoDir = fs.existsSync("");
-	console.log("data folder: "+fs.existsSync("/data"));
+	that.photoDir = process.env.PWD.replace("src", "data");
+	console.log(photoDir);
+	console.log("data folder exists: "+fs.existsSync(photoDir));
 }
 
 module.exports = new photoModule();
