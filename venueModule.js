@@ -200,7 +200,7 @@ function venueModule() {
 	
 	// high detail response for venue window
 	that.findVenue = function(id, callback){
-		commentModule.getCommentsByVenue(id, function(comments){
+		commentModule.findCommentsByVenue(id, function(comments){
 			database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
 				if(!err){
 					for(var i=0; i<rows.length; i++){

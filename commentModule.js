@@ -5,7 +5,7 @@ function commentModule(){
 	var database = require('./database');
 	
 	
-	that.getComment = function(id, callback){
+	that.findComment = function(id, callback){
 		database.connection.query("SELECT * FROM comment WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
 				for(var i=0; i<rows.length; i++){
@@ -27,7 +27,7 @@ function commentModule(){
 		});
 	};
 	
-	that.getCommentsByVenue = function(venueId, callback){
+	that.findCommentsByVenue = function(venueId, callback){
 		database.connection.query("SELECT comment.*,users.username FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=?", [venueId], function(err, rows, fields){
 			if(!err){
 				var comments = [];
@@ -52,7 +52,7 @@ function commentModule(){
 		});
 	};
 	
-	that.getCommentsByUser = function(userId, callback){
+	that.findCommentsByUser = function(userId, callback){
 		database.connection.query("SELECT * FROM comment WHERE userID=?", [userId], function(err, rows, fields){
 			if(!err){
 				var comments = [];
@@ -90,7 +90,19 @@ function commentModule(){
 		});
 	};
 	
-	that.deleteComment = function(id, callback){
+	that.updateCommentRating = function(id, rating, callback){
+		database.connection.query("UPDATE comment SET score=? WHERE id=?", [rating, id], function(err, result){
+			if(!err){
+				console.log("Updated comment: " + id);
+				callback(id);
+			} else {
+				console.log("Error updating comment score");
+				callback(null);
+			}
+		});
+	}
+	
+	that.removeComment = function(id, callback){
 		database.connection.query("DELETE FROM comment WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
 				console.log("Deleted comment " + id);
@@ -102,6 +114,70 @@ function commentModule(){
 			callback(null);
 		});
 	};
+	
+	
+	
+	that.getScoreForComment = function(id, callback){
+		database.connection.query("SELECT SUM(rating) AS score FROM comment_rating WHERE comment=?", [id], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					console.log("Score for comment " + id + " is " + rows[i].score);
+					callback(rows[i].score);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for comment score");
+			}
+			callback(null);
+		});
+	};
+	
+	that.findRating = function(comment, user, callback){
+		database.connection.query("SELECT * FROM comment_rating WHERE comment=? AND user=?", [comment, user], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					var rating = {
+						user: rows[i].user,
+						comment: rows[i].comment,
+						rating: rows[i].rating,
+						timestamp: rows[i].timestamp
+					}
+					callback(rating);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for comment rating");
+			}
+			callback(null);
+		});
+	};
+	
+	that.insertRating = function(rating, callback){
+		database.connection.query("INSERT INTO comment_rating SET comment=?, rating=?, user=?",
+		[rating.comment, rating.rating, rating.user], function(err, result){
+			if(!err){
+				console.log("Inserted comment rating into DB");
+				callback(rating);
+			} else {
+				console.log("Error trying to insert comment rating into database");
+				callback(null);
+			}
+		});
+	};
+	
+	that.updateRating = function(rating, callback){
+		database.connection.query("UPDATE comment_rating SET rating=? WHERE comment=? AND user=?",
+		[rating.rating, rating.comment, rating.user], function(err, result){
+			if(!err){
+				console.log("Updated comment rating");
+				callback(rating);
+			} else {
+				console.log("Error updating comment rating");
+				callback(null);
+			}
+		});
+	}
+	
 	
 	
 	that.postComment = function(req, res, next){
@@ -121,6 +197,66 @@ function commentModule(){
 					res.send(201, {success: true});
 				});
 			}
+		} else {
+			res.send(401, {success: false});
+		}
+		return next();
+	};
+	
+	that.delComment = function(req, res, next){
+		if(req.user && req.user.id){
+			that.findComment(req.params.id, function(comment){
+				if(!comment){
+					res.send(404, {success: false});
+				} else {
+					if(comment.user == req.user.id){
+						that.removeComment(req.params.id, function(result){
+							if(!result){
+								res.send(404, {success: false});
+							} else {
+								res.send(200, {success: true});
+							}
+						});
+					} else {
+						res.send(401, {success: false});
+					}
+				}
+			});
+		} else {
+			res.send(401, {success: false});
+		}
+		return next();
+	};
+	
+	that.rateComment = function(req, res, next){
+		if(req.user && req.user.id){
+			that.findRating(req.params.comment, req.user.id, function(rating){
+				if(!rating){
+					that.insertRating({comment: req.params.comment, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getScoreForComment(req.params.comment, function(score){
+							that.updateCommentRating(req.params.comment, score, function(comment){
+								if(!comment){
+									res.send(404, {success: false});
+								} else {
+									res.send(200, {success: true});
+								}
+							});
+						});
+					});
+				} else {
+					that.updateRating({comment: req.params.comment, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getScoreForComment(req.params.comment, function(score){
+							that.updateCommentRating(req.params.comment, score, function(comment){
+								if(!comment){
+									res.send(404, {success: false});
+								} else {
+									res.send(200, {success: true});
+								}
+							});
+						});
+					});
+				}
+			});
 		} else {
 			res.send(401, {success: false});
 		}

@@ -3,7 +3,7 @@ var database = require('./database');
 var venueModule = require('./venueModule');
 var userModule = require('./userModule');
 var commentModule = require('./commentModule');
-var photoModule = require('./photoModule');
+//var photoModule = require('./photoModule');
 
 const port = 8080;
 
@@ -32,7 +32,9 @@ server.get('venues',		venueModule.getVenues); //expected object keys: lat:..., l
 server.get('venues/:id',	venueModule.getVenue);
 
 server.post('comments',		commentModule.postComment); //comment:..., venueId:...
-//server.del('comments/:id',	commentModule.delComment);
+server.del('comments/:id',	commentModule.delComment);
+
+server.post('commentRatings',commentModule.rateComment); //comment:..., rating:... (-1 or +1)
 
 /* server.listen(3000, function(){
     console.log('%s is listening at %s', server.name, server.url);
@@ -40,7 +42,7 @@ server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
-	console.log('Photos are in %s', photoModule.photoDir);
-	console.log(process.env);
+	//console.log('Photos are in %s', photoModule.photoDir);
+	//console.log(process.env);
 	database.connect();
 });
