@@ -41,5 +41,6 @@ server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
 	console.log('Photos are in %s', photoModule.photoDir);
+	console.log(process.env);
 	database.connect();
 });
