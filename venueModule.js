@@ -446,6 +446,118 @@ function venueModule() {
 		return next();
 	};
 	
+	
+	
+	that.findRating = function(venue, user, callback){
+		database.connection.query("SELECT * FROM venue_rating WHERE venue=? AND user_id=?", [venue, user], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					var rating = {
+						user: rows[i].user_id,
+						venue: rows[i].venue,
+						rating: rows[i].rating,
+						timestamp: rows[i].timestamp
+					}
+					callback(rating);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for venue rating");
+			}
+			callback(null);
+		});
+	};
+	
+	that.insertRating = function(rating, callback){
+		database.connection.query("INSERT INTO venue_rating SET venue=?, rating=?, user_id=?",
+		[rating.venue, rating.rating, rating.user], function(err, result){
+			if(!err){
+				console.log("Inserted venue rating into DB");
+				callback(rating);
+			} else {
+				console.log("Error trying to insert venue rating into database");
+				callback(null);
+			}
+		});
+	};
+	
+	that.updateRating = function(rating, callback){
+		database.connection.query("UPDATE venue_rating SET rating=? WHERE venue=? AND user_id=?",
+		[rating.rating, rating.venue, rating.user], function(err, result){
+			if(!err){
+				console.log("Updated venue rating");
+				callback(rating);
+			} else {
+				console.log("Error updating venue rating");
+				callback(null);
+			}
+		});
+	};
+	
+	that.getAvgForVenue = function(id, callback){
+		database.connection.query("SELECT AVG(rating) AS avg FROM venue_rating WHERE venue=?", [id], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					console.log("Avg rating for venue " + id + " is " + rows[i].avg);
+					callback(rows[i].avg);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for venue avg");
+			}
+			callback(null);
+		});
+	};
+	
+	that.updateVenueRating = function(id, rating, callback){
+		database.connection.query("UPDATE venues SET rating=? WHERE id=?", [rating, id], function(err, result){
+			if(!err){
+				console.log("Updated venue: " + id);
+				callback(id);
+			} else {
+				console.log("Error updating venue rating");
+				callback(null);
+			}
+		});
+	};
+	
+	
+	
+	that.rateVenue = function(req, res, next){
+		if(req.user && req.user.id){
+			that.findRating(req.params.id, req.user.id, function(rating){
+				if(!rating){
+					that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getAvgForVenue(req.params.id, function(avg){
+							that.updateVenueRating(req.params.id, avg, function(venue){
+								if(!venue){
+									res.send(404, {success: false});
+								} else {
+									res.send(200, {success: true});
+								}
+							});
+						});
+					});
+				} else {
+					that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getAvgForVenue(req.params.id, function(avg){
+							that.updateVenueRating(req.params.id, avg, function(venue){
+								if(!venue){
+									res.send(404, {success: false});
+								} else {
+									res.send(200, {success: true});
+								}
+							});
+						});
+					});
+				}
+			});
+		} else {
+			res.send(401, {success: false});
+		}
+		return next();
+	};
+	
 	// that.postVenue = function(req, res, next){
 		// if(!req.body.hasOwnProperty('place_id')){
 			// res.send(500, "Insufficient parameters, place_id required");

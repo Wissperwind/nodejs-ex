@@ -31,6 +31,8 @@ server.get({url:'/hello'}, loginModule.helloRoute);
 server.get('venues',		venueModule.getVenues); //expected object keys: lat:..., lng:... | city:...
 server.get('venues/:id',	venueModule.getVenue);
 
+server.post('venueRatings',		venueModule.rateVenue);
+
 server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 server.del('comments/:id',	commentModule.delComment);
 

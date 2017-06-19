@@ -100,7 +100,7 @@ function commentModule(){
 				callback(null);
 			}
 		});
-	}
+	};
 	
 	that.removeComment = function(id, callback){
 		database.connection.query("DELETE FROM comment WHERE id=?", [id], function(err, rows, fields){
@@ -176,7 +176,20 @@ function commentModule(){
 				callback(null);
 			}
 		});
-	}
+	};
+	
+	that.removeRating = function(comment, user, callback){
+		database.connection.query("DELETE FROM comment_rating WHERE comment=? AND user=?", [comment, user], function(err, rows, fields){
+			if(!err){
+				console.log("Deleted comment rating");
+				callback("OK");
+				return;
+			} else {
+				console.log("Error deleting comment rating from DB");
+			}
+			callback(null);
+		});
+	};
 	
 	
 	
@@ -230,11 +243,11 @@ function commentModule(){
 	
 	that.rateComment = function(req, res, next){
 		if(req.user && req.user.id){
-			that.findRating(req.params.comment, req.user.id, function(rating){
+			that.findRating(req.params.id, req.user.id, function(rating){
 				if(!rating){
-					that.insertRating({comment: req.params.comment, rating: req.params.rating, user: req.user.id}, function(rating){
-						that.getScoreForComment(req.params.comment, function(score){
-							that.updateCommentRating(req.params.comment, score, function(comment){
+					that.insertRating({comment: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getScoreForComment(req.params.id, function(score){
+							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
 									res.send(404, {success: false});
 								} else {
@@ -244,9 +257,9 @@ function commentModule(){
 						});
 					});
 				} else {
-					that.updateRating({comment: req.params.comment, rating: req.params.rating, user: req.user.id}, function(rating){
-						that.getScoreForComment(req.params.comment, function(score){
-							that.updateCommentRating(req.params.comment, score, function(comment){
+					that.updateRating({comment: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+						that.getScoreForComment(req.params.id, function(score){
+							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
 									res.send(404, {success: false});
 								} else {
