@@ -36,7 +36,8 @@ server.post('venueRatings',		venueModule.rateVenue);
 server.post('comments',		commentModule.postComment); //comment:..., venueId:...
 server.del('comments/:id',	commentModule.delComment);
 
-server.post('commentRatings',commentModule.rateComment); //comment:..., rating:... (-1 or +1)
+server.post('commentRatings',	commentModule.rateComment); //comment:..., rating:... (-1 or +1)
+//server.put('commentRatings/:id',commentModule.rateComment);
 
 /* server.listen(3000, function(){
     console.log('%s is listening at %s', server.name, server.url);

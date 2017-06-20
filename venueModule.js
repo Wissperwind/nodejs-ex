@@ -558,6 +558,52 @@ function venueModule() {
 		return next();
 	};
 	
+	
+	// TODO
+	that.checkIn = function(req, res, next){
+		if(req.user && req.user.id){
+			that.findCheckIn(req.params.id, req.user.id, function(checkIn){
+				
+				if(checkIn){
+					that.updateCheckIn({venue: req.params.id, user: req.user.id, count: checkIn.count + 1}, function(checkin){
+						
+					});
+				}
+				
+				that.findRating(req.params.id, req.user.id, function(rating){
+					if(!rating){
+						that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+							that.getAvgForVenue(req.params.id, function(avg){
+								that.updateVenueRating(req.params.id, avg, function(venue){
+									if(!venue){
+										res.send(404, {success: false});
+									} else {
+										res.send(200, {success: true});
+									}
+								});
+							});
+						});
+					} else {
+						that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+							that.getAvgForVenue(req.params.id, function(avg){
+								that.updateVenueRating(req.params.id, avg, function(venue){
+									if(!venue){
+										res.send(404, {success: false});
+									} else {
+										res.send(200, {success: true});
+									}
+								});
+							});
+						});
+					}
+				});
+			});
+		} else {
+			res.send(401, {success: false});
+		}
+		return next();
+	};
+	
 	// that.postVenue = function(req, res, next){
 		// if(!req.body.hasOwnProperty('place_id')){
 			// res.send(500, "Insufficient parameters, place_id required");

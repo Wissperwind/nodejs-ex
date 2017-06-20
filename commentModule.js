@@ -6,7 +6,7 @@ function commentModule(){
 	
 	
 	that.findComment = function(id, callback){
-		database.connection.query("SELECT * FROM comment WHERE id=?", [id], function(err, rows, fields){
+		database.connection.query("SELECT *,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
 				for(var i=0; i<rows.length; i++){
 					var comment = {
@@ -15,7 +15,7 @@ function commentModule(){
 						venue: rows[i].venueID,
 						photo: rows[i].photoID,
 						text: rows[i].text,
-						timestamp: rows[i].timestamp
+						time: rows[i].time
 					}
 					callback(comment);
 					return;
@@ -28,7 +28,7 @@ function commentModule(){
 	};
 	
 	that.findCommentsByVenue = function(venueId, callback){
-		database.connection.query("SELECT comment.*,users.username FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=?", [venueId], function(err, rows, fields){
+		database.connection.query("SELECT comment.*,users.username,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=?", [venueId], function(err, rows, fields){
 			if(!err){
 				var comments = [];
 				for(var i=0; i<rows.length; i++){
@@ -38,8 +38,9 @@ function commentModule(){
 						author: rows[i].username,
 						//venue: rows[i].venueID,
 						//photo: rows[i].photoID,
-						text: rows[i].text
-						//timestamp: rows[i].timestamp
+						text: rows[i].text,
+						score: rows[i].score,
+						time: rows[i].time
 					}
 					comments.push(comment);
 				}
