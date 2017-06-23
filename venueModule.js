@@ -571,7 +571,7 @@ function venueModule() {
 	
 	
 	// TODO
-	that.checkIn = function(req, res, next){
+	/* that.checkIn = function(req, res, next){
 		if(req.user && req.user.id){
 			if()
 				that.findCheckIn(req.params.id, req.user.id, function(checkIn){
@@ -614,7 +614,9 @@ function venueModule() {
 			res.send(401, {success: false});
 		}
 		return next();
-	};
+	}; */
+	
+	
 	
 	// that.postVenue = function(req, res, next){
 		// if(!req.body.hasOwnProperty('place_id')){
