@@ -7,6 +7,7 @@ function venueModule() {
 	var database = require('./database');
 	var cityModule = require('./cityModule');
 	var commentModule = require('./commentModule');
+	var checkinModule = require('./checkinModule');
 	var GoogleImport = require('./GoogleImport');
 	const USER_SEARCH_RADIUS = 1000;
 	//const USER_SEARCH_RADIUS = 400; //for testing
@@ -546,12 +547,12 @@ function venueModule() {
 				}
 			});
 		} else {
-			res.send(401, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in."});
 		}
 		return next();
 	};
 	
-	that.rateVenue = function(req, res, next){
+	/* that.rateVenue = function(req, res, next){
 		if(req.user && req.user.id){
 			that.findRating(req.params.id, req.user.id, function(rating){
 				if(!rating){
@@ -581,13 +582,56 @@ function venueModule() {
 				}
 			});
 		} else {
-			res.send(401, {success: false});
+			res.send(403, {success: false});
 		}
 		return next();
-	};
+	}; */
 	
 	
 	// TODO
+	that.checkIn = function(req, res, next){
+		if(req.user && req.user.id){
+			if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('rating')){
+				res.send(500, {error: "No venue or rating specified."});
+			} else {
+				checkinModule.checkIn(req.params.id, req.user.id, function(foo){
+					if(foo){
+						that.findRating(req.params.id, req.user.id, function(rating){
+							if(!rating){
+								that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+									that.getAvgForVenue(req.params.id, function(avg){
+										that.updateVenueRating(req.params.id, avg, function(venue){
+											if(!venue){
+												res.send(404, {error: "Venue does not exist."});
+											} else {
+												res.send(200, {error: "false"});
+											}
+										});
+									});
+								});
+							} else {
+								that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+									that.getAvgForVenue(req.params.id, function(avg){
+										that.updateVenueRating(req.params.id, avg, function(venue){
+											if(!venue){
+												res.send(404, {error: "Venue does not exist."});
+											} else {
+												res.send(200, {error: "false"});
+											}
+										});
+									});
+								});
+							}
+						});
+					} else {
+						res.send(429, {error: "You must wait four hours between checkins"});
+					}
+				});
+			}
+		} else {
+			res.send(403, {error: "You are not signed in."});
+		}
+	};
 	/* that.checkIn = function(req, res, next){
 		if(req.user && req.user.id){
 			if()
@@ -628,7 +672,7 @@ function venueModule() {
 					});
 				});
 		} else {
-			res.send(401, {success: false});
+			res.send(403, {success: false});
 		}
 		return next();
 	}; */

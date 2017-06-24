@@ -212,7 +212,7 @@ function commentModule(){
 				});
 			}
 		} else {
-			res.send(401, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in."});
 		}
 		return next();
 	};
@@ -232,12 +232,12 @@ function commentModule(){
 							}
 						});
 					} else {
-						res.send(401, {error: "This is not your comment."});
+						res.send(403, {error: "This is not your comment."});
 					}
 				}
 			});
 		} else {
-			res.send(401, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in."});
 		}
 		return next();
 	};
@@ -272,7 +272,7 @@ function commentModule(){
 				}
 			});
 		} else {
-			res.send(401, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in."});
 		}
 		return next();
 	};
