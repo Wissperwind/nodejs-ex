@@ -26,12 +26,24 @@ server.post('/signup', loginModule.signUp);
 server.post({url:'/login'}, loginModule.loginRoute);
 server.get({url:'/hello'}, loginModule.helloRoute);
 
+
+// should we reconsider the URLs? maybe:
+// /users
+// /venues
+// /venues/<venueID>/comments/<userID>
+// /venues/<venueID>/ratings/<userID>
+// ...
+
+
+
 //server.get('venues/position/:latlng',	venueModule.getVenues); // deprecated; latlng should be "lat,lng", split did not work with #
 //server.get('venues',					venueModule.getVenues); // expected: venues?lat=<...>&lng=<...> or venues?city=...
 server.get('venues',		venueModule.getVenues); //expected object keys: lat:..., lng:... | city:...
 server.get('venues/:id',	venueModule.getVenue);
 
 server.post('venueRatings',		venueModule.rateVenue);
+//server.get('venueRatings',	venueModule.getRatingForUser);
+server.get('venues/:id/ratings',venueModule.getRatingForUser);
 
 server.post('comments',		commentModule.postComment); //comment:..., venueid:...
 server.put('comments/:id',	commentModule.rateComment);

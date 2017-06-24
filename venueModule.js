@@ -534,6 +534,23 @@ function venueModule() {
 	
 	
 	
+	that.getRatingForUser = function(req, res, next){
+		if(req.user && req.user.id){
+			console.log("Request for rating venue;user: " + req.params.id + ";" + req.user.id);
+			//that.findRating(req.params.venueid, req.user.id, function(rating){
+			that.findRating(req.params.id, req.user.id, function(rating){
+				if(rating){
+					res.send(200, {error: "false", rating: rating.rating});
+				} else {
+					res.send(404, {error: "false", rating: -1});
+				}
+			});
+		} else {
+			res.send(401, {error: "You are not signed in."});
+		}
+		return next();
+	};
+	
 	that.rateVenue = function(req, res, next){
 		if(req.user && req.user.id){
 			that.findRating(req.params.id, req.user.id, function(rating){
