@@ -196,23 +196,23 @@ function commentModule(){
 	
 	that.postComment = function(req, res, next){
 		if(req.user && req.user.id && req.user.username){
-			if(!req.body.hasOwnProperty('comment') || !req.body.hasOwnProperty('venueId')){
-				res.send(500, {success: false});
+			if(!req.body.hasOwnProperty('comment') || !req.body.hasOwnProperty('venueid')){
+				res.send(500, {error: "No comment text or venue specified."});
 			} else {
 				var comment = {
 					user: req.user.id,
-					venue: req.body.venueId,
+					venue: req.body.venueid,
 					text: req.body.comment,
 					photo: null
 				};
 				
 				that.saveComment(comment, function(comment){
 					console.log("Comment added: id "+comment.id);
-					res.send(201, {success: true});
+					res.send(201, {error: "false"});
 				});
 			}
 		} else {
-			res.send(401, {success: false});
+			res.send(401, {error: "You are not signed in."});
 		}
 		return next();
 	};
@@ -221,23 +221,23 @@ function commentModule(){
 		if(req.user && req.user.id){
 			that.findComment(req.params.id, function(comment){
 				if(!comment){
-					res.send(404, {success: false});
+					res.send(404, {error: "This comment does not exist."});
 				} else {
 					if(comment.user == req.user.id){
 						that.removeComment(req.params.id, function(result){
 							if(!result){
-								res.send(404, {success: false});
+								res.send(404, {error: "This comment does not exist."});
 							} else {
-								res.send(200, {success: true});
+								res.send(200, {error: "false"});
 							}
 						});
 					} else {
-						res.send(401, {success: false});
+						res.send(401, {error: "This is not your comment."});
 					}
 				}
 			});
 		} else {
-			res.send(401, {success: false});
+			res.send(401, {error: "You are not signed in."});
 		}
 		return next();
 	};
