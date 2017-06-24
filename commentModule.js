@@ -250,9 +250,9 @@ function commentModule(){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
-									res.send(404, {success: false});
+									res.send(404, {error: "This comment does not exist."});
 								} else {
-									res.send(200, {success: true});
+									res.send(200, {error: "false"});
 								}
 							});
 						});
@@ -262,9 +262,9 @@ function commentModule(){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
-									res.send(404, {success: false});
+									res.send(404, {error: "This comment does not exist."});
 								} else {
-									res.send(200, {success: true});
+									res.send(200, {error: "false"});
 								}
 							});
 						});
@@ -272,7 +272,7 @@ function commentModule(){
 				}
 			});
 		} else {
-			res.send(401, {success: false});
+			res.send(401, {error: "You are not signed in."});
 		}
 		return next();
 	};
