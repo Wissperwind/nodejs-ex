@@ -84,9 +84,23 @@ function venueModule() {
 		
 		function addVenueTypes(id, types, counter, callback){
 			if(counter<types.length){
-				database.connection.query("INSERT INTO venuekind SET venue_id=?, type=?", [id, types[counter]], function(err, result){
+				
+				var vtype = "";
+				switch(types[counter]){
+					case "bakery": vtype = "Bakery"; break;
+					case "bar": vtype = "Bar"; break;
+					case "cafe": vtype = "Cafe"; break;
+					//case "liquor_store": vtype = "Spirits"; break;
+					case "meal_delivery": vtype = "Delivery"; break;
+					case "meal_takeaway": vtype = "Takeaway"; break;
+					case "night_club": vtype = "Club"; break;
+					case "restaurant": vtype = "Restaurant"; break;
+					default: addVenueTypes(id, types, counter+1, callback); return;
+				}
+				
+				database.connection.query("INSERT INTO venuekind SET venue_id=?, type=?", [id, vtype], function(err, result){
 					if(!err) {
-						console.log("Added type " + types[counter] + " to venue " + id +" into DB");
+						console.log("Added type " + vtype + " to venue " + id +" into DB");
 						addVenueTypes(id, types, counter+1, callback);
 					} else {
 						console.log("Error trying to add type for venue " + id);
