@@ -86,6 +86,24 @@ function userModule(){
         });
 
     };
+	
+	that.findUser = function(id, callback){
+		database.connection.query("SELECT * FROM users WHERE id=?", [id], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					var user = {
+						id: rows[i].id,
+						username: rows[i].username
+					}
+					callback(user);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for user");
+			}
+			callback(null);
+		});
+	};
 }
 
 module.exports = new userModule();

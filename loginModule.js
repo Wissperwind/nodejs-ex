@@ -42,15 +42,19 @@ function loginModule() {
 
 // This is how a user gets serialized
     passport.serializeUser(function(user, done) {
-        done(null, user);
+        done(null, user.id);
     });
 
 // This is how a user gets deserialized
     passport.deserializeUser(function(id, done) {
+		
+		userModule.findUser(id, function(user){
+			done(null, user);
+		});
         //console.log(id)
         // Look the user up in the database and return the user object
         // For this demo, return a static user
-        return done(null, id);
+        //return done(null, id);
     });
 
 
