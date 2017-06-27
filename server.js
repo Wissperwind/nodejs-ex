@@ -12,6 +12,7 @@ server = restify.createServer({
 });
 //server.listen(port)
 
+
 server.use(restify.bodyParser());
 server.use(restify.queryParser());
 
@@ -20,6 +21,15 @@ server.on('uncaughtException', function (req, res, route, err) {
 });
 
 var loginModule = require('./loginModule');
+
+server.use(function(req, res, next){
+	console.log("-----Incoming request:");
+	console.log("-Headers:\n", req.headers);
+	console.log("-Passport:\n", req["_passport"]);
+	console.log("-User Object:\n", req.user);
+	console.log("-Session Object:\n", req.session);
+	return next();
+});
 
 server.post('/signup', loginModule.signUp);
 
