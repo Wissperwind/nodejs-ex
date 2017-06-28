@@ -3,7 +3,7 @@ var database = require('./database');
 var venueModule = require('./venueModule');
 var userModule = require('./userModule');
 var commentModule = require('./commentModule');
-//var photoModule = require('./photoModule');
+var photoModule = require('./photoModule');
 
 const port = 8080;
 
@@ -24,6 +24,7 @@ var loginModule = require('./loginModule');
 
 server.use(function(req, res, next){
 	console.log("-----Incoming request:");
+	console.log("-Full request:\n", req);
 	console.log("-Headers:\n", req.headers);
 	console.log("-Passport:\n", req["_passport"]);
 	console.log("-User Object:\n", req.user);
@@ -70,7 +71,7 @@ server.del('comments/:id',	commentModule.delComment);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
-	//console.log('Photos are in %s', photoModule.photoDir);
+	console.log('Photos are in %s', photoModule.photoDir);
 	//console.log(process.env);
 	database.connect();
 });
