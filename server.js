@@ -22,7 +22,7 @@ server.on('uncaughtException', function (req, res, route, err) {
 
 var loginModule = require('./loginModule');
 
-server.use(function(req, res, next){
+/* server.use(function(req, res, next){
 	console.log("-----Incoming request:");
 	console.log("-Full request:\n", req);
 	console.log("-Headers:\n", req.headers);
@@ -30,7 +30,7 @@ server.use(function(req, res, next){
 	console.log("-User Object:\n", req.user);
 	console.log("-Session Object:\n", req.session);
 	return next();
-});
+}); */
 
 server.post('/signup', loginModule.signUp);
 
@@ -71,7 +71,7 @@ server.del('comments/:id',	commentModule.delComment);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
-	console.log('Photos are in %s', photoModule.photoDir);
+	//console.log('Photos are in %s', photoModule.photoDir);
 	//console.log(process.env);
 	database.connect();
 });
