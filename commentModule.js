@@ -195,6 +195,7 @@ function commentModule(){
 	
 	
 	that.postComment = function(req, res, next){
+		
 		if(req.user && req.user.id && req.user.username){
 			if(!req.body.hasOwnProperty('comment') || !req.body.hasOwnProperty('venueid')){
 				res.send(500, {error: "No comment text or venue specified."});
