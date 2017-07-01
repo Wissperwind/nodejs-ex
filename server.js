@@ -62,6 +62,8 @@ server.post('comments',		commentModule.postComment); //comment:..., venueid:...
 server.put('comments/:id',	commentModule.rateComment);
 server.del('comments/:id',	commentModule.delComment);
 
+server.post('venues/:id/photos',	photoModule.postPhotoVenue);
+
 //server.post('commentRatings',	commentModule.rateComment); //comment:..., rating:... (-1 or +1)
 //server.put('commentRatings/:id',commentModule.rateComment);
 
@@ -71,6 +73,7 @@ server.del('comments/:id',	commentModule.delComment);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
+	console.log("Photos are in %s, this folder exists: "+fs.existsSync(photoModule.photoDir), photoModule.photoDir);
 	//console.log('Photos are in %s', photoModule.photoDir);
 	//console.log(process.env);
 	database.connect();
