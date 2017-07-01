@@ -28,7 +28,7 @@ function commentModule(){
 	};
 	
 	that.findCommentsByVenue = function(venueId, callback){
-		database.connection.query("SELECT comment.*,users.username,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=?", [venueId], function(err, rows, fields){
+		database.connection.query("SELECT comment.*,users.username,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=? ORDER BY score DESC", [venueId], function(err, rows, fields){
 			if(!err){
 				var comments = [];
 				for(var i=0; i<rows.length; i++){
@@ -198,7 +198,7 @@ function commentModule(){
 		
 		if(req.user && req.user.id && req.user.username){
 			if(!req.body.hasOwnProperty('comment') || !req.body.hasOwnProperty('venueid')){
-				res.send(500, {error: "No comment text or venue specified."});
+				res.send(400, {error: "No comment text or venue specified."});
 			} else {
 				var comment = {
 					user: req.user.id,

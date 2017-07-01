@@ -26,14 +26,15 @@ function checkinModule(){
 	};
 	
 	that.findCheckinsByVenue = function(venueId, callback){
-		database.connection.query("SELECT * FROM user_checkin_venue WHERE venueID=?", [venueId], function(err, rows, fields){
+		database.connection.query("SELECT * FROM user_checkin_venue LEFT JOIN users ON (userID = id) WHERE venueID=? ORDER BY checkin_count DESC LIMIT 5", [venueId], function(err, rows, fields){
 			if(!err){
 				var checkins = [];
 				for(var i=0; i<rows.length; i++){
 					var checkin = {
 						user: rows[i].userID,
 						venue: rows[i].venueID,
-						checkins: rows[i].checkin_count
+						name: rows[i].username,
+						visits: rows[i].checkin_count
 					}
 					checkins.push(checkin);
 				}
