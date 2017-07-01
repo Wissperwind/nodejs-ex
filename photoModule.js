@@ -12,6 +12,8 @@ function photoModule(){
 	that.photoFilePath = that.photoDir + "/photo";
 	//that.photoDir = "../testfolder"
 	
+	console.log("Photos are in %s, this folder exists: "+fs.existsSync(that.photoDir), that.photoDir);
+	
 	that.findPhoto = function(id, callback){
 		
 	}

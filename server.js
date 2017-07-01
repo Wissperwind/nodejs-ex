@@ -1,4 +1,5 @@
 var restify = require('restify');
+var plugins = require('restify-plugins');
 var database = require('./database');
 var venueModule = require('./venueModule');
 var userModule = require('./userModule');
@@ -13,8 +14,8 @@ server = restify.createServer({
 //server.listen(port)
 
 
-server.use(restify.bodyParser());
-server.use(restify.queryParser());
+server.use(plugins.bodyParser());
+server.use(plugins.queryParser({mapParams: true}));
 
 server.on('uncaughtException', function (req, res, route, err) {
     console.log('uncaughtException', err.stack);
@@ -73,7 +74,6 @@ server.post('venues/:id/photos',	photoModule.postPhotoVenue);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
-	console.log("Photos are in %s, this folder exists: "+fs.existsSync(photoModule.photoDir), photoModule.photoDir);
 	//console.log('Photos are in %s', photoModule.photoDir);
 	//console.log(process.env);
 	database.connect();
