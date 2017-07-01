@@ -8,6 +8,7 @@ function venueModule() {
 	var cityModule = require('./cityModule');
 	var commentModule = require('./commentModule');
 	var checkinModule = require('./checkinModule');
+	var photoModule = require('./photoModule');
 	var GoogleImport = require('./GoogleImport');
 	const USER_SEARCH_RADIUS = 1000;
 	//const USER_SEARCH_RADIUS = 400; //for testing
@@ -217,33 +218,35 @@ function venueModule() {
 	that.findVenue = function(id, callback){
 		commentModule.findCommentsByVenue(id, function(comments){
 			checkinModule.findCheckinsByVenue(id, function(checkins){
-				database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
-					if(!err){
-						for(var i=0; i<rows.length; i++){
-							console.log("Found venue: " + rows[i].name);
-							var venue = {
-								id:	rows[i].id,
-								name: rows[i].name,
-								lat: rows[i].lat,
-								lng: rows[i].lng,
-								rating: rows[i].rating,
-								longdescription: ""+rows[i].address,
-								images: [],
-								comments: comments,
-								topvisitors: checkins
-								//address: rows[i].address,
-								//phone: rows[i].phone,
-								//website: rows[i].website,
-								//weekday_text: rows[i].weekday_text,
-								//price_level: rows[i].price_level
-							};
-							callback(venue);
-							return;
+				photoModule.findPhotosOfVenue(id, function(photos){
+					database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
+						if(!err){
+							for(var i=0; i<rows.length; i++){
+								console.log("Found venue: " + rows[i].name);
+								var venue = {
+									id:	rows[i].id,
+									name: rows[i].name,
+									lat: rows[i].lat,
+									lng: rows[i].lng,
+									rating: rows[i].rating,
+									longdescription: ""+rows[i].address,
+									images: photos,
+									comments: comments,
+									topvisitors: checkins
+									//address: rows[i].address,
+									//phone: rows[i].phone,
+									//website: rows[i].website,
+									//weekday_text: rows[i].weekday_text,
+									//price_level: rows[i].price_level
+								};
+								callback(venue);
+								return;
+							}
+						} else {
+							console.log("Error querying DB for venue")
 						}
-					} else {
-						console.log("Error querying DB for venue")
-					}
-					callback(null);
+						callback(null);
+					});
 				});
 			});
 		});

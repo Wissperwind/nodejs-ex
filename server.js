@@ -64,6 +64,7 @@ server.put('comments/:id',	commentModule.rateComment);
 server.del('comments/:id',	commentModule.delComment);
 
 server.post('venues/:id/photos',	photoModule.postPhotoVenue);
+server.get('photos/:id',			photoModule.getPhoto);
 
 //server.post('commentRatings',	commentModule.rateComment); //comment:..., rating:... (-1 or +1)
 //server.put('commentRatings/:id',commentModule.rateComment);

@@ -8,15 +8,60 @@ function photoModule(){
 	
 	//that.photoDir = process.env.OPENSHIFT_DATA_DIR; //does not work...
 	that.photoDir = "../../../teamuniformdata";//+process.env.PWD;
-	that.photoDir = "photos"
+	//that.photoDir = "photos"
 	that.photoFilePath = that.photoDir + "/photo";
 	//that.photoDir = "../testfolder"
 	
+	that.serverAddress =  "http://teamuniform-teamuniform.7e14.starter-us-west-2.openshiftapps.com";
+	//that.serverAddress =  "localhost:8080";
+	
 	console.log("Photos are in %s, this folder exists: "+fs.existsSync(that.photoDir), that.photoDir);
 	
-	that.findPhoto = function(id, callback){
-		
-	}
+	that.findPhotoPathId = function(id, callback){
+		database.connection.query("SELECT * FROM photo WHERE id=?", [id], function(err, rows, fields){
+			if(!err){
+				for(var i=0; i<rows.length; i++){
+					var photo = {
+						id: rows[i].id,
+						path: rows[i].path + rows[i].id + ".jpg"
+					}
+					callback(photo);
+					return;
+				}
+			} else {
+				console.log("Error querying DB for photo");
+			}
+			callback(null);
+		});
+	};
+	
+	that.findPhotoFile = function(path, callback){
+		fs.readFile(path, function(err, data){
+			if(!err) {
+				callback(data);
+			} else {
+				console.log(err);
+				callback(null);
+			}
+		})
+	};
+	
+	that.findPhotosOfVenue = function(id, callback){
+		database.connection.query("SELECT * FROM venue_has_picture LEFT JOIN photo ON (photo.id = venue_has_picture.photoID) WHERE venueID=?", [id], function(err, rows, fields){
+			if(!err){
+				var photos = [];
+				for(var i=0; i<rows.length; i++){
+					var photoURL = that.serverAddress+"/photos/"+rows[i].id;
+					photos.push(photoURL);
+				}
+				callback(photos);
+				return;
+			} else {
+				console.log("Error querying DB for venue photos");
+			}
+			callback(null);
+		});
+	};
 	
 	that.addPhotoPathId = function(callback){
 		database.connection.query("INSERT INTO photo SET path=?", [that.photoFilePath], function(err, result){
@@ -66,6 +111,23 @@ function photoModule(){
 			} else {
 				console.log("Error trying to insert photo for venue");
 				callback(null);
+			}
+		});
+	};
+	
+	that.getPhoto = function(req, res, next){
+		that.findPhotoPathId(req.params.id, function(photo){
+			if(photo){
+				that.findPhotoFile(photo.path, function(file){
+					if(file){
+						res.setHeader("Content-Type", "image/jpeg");
+						res.setHeader("Content-Disposition", "inline;filename=\"photo"+photo.id+"\"");
+						res.send(200, file);
+					} else
+						res.send(500, {error: "Server error. Can not get photo."})
+				});
+			} else {
+				res.send(404, {error: "Photo does not exist."});
 			}
 		});
 	};
