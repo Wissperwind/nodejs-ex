@@ -68,10 +68,6 @@ function photoModule(){
 		});
 	};
 	
-	that.getVenue = function(req, res, next){
-		
-	};
-	
 	that.postPhotoVenue = function(req, res, next){
 		if(req.user && req.user.id){
 			if(!req.params.id){
