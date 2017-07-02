@@ -104,6 +104,38 @@ function userModule(){
 			callback(null);
 		});
 	};
+	
+	that.updateLastPos = function(id, lat, lng, callback){
+		database.connection.query("UPDATE users SET lastLat=?, lastLong=? WHERE id=?", [lat, lng, id], function(err, result){
+			if(!err){
+				console.log("Updated user position");
+				callback(id);
+			} else {
+				console.log("Error updating user position");
+				console.log(err);
+				callback(null);
+			}
+		});
+	}
+	
+	that.putPosition = function(req, res, next){
+		if(req.user && req.user.id){
+			if(!req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng')){
+				res.send(400, {error: "No lat and/or lng specified."});
+			} else {
+				that.updateLastPos(req.user.id, req.body.lat, req.body.lng, function(id){
+					if(id){
+						res.send(200, {error: "false"});
+					} else {
+						res.send(500, {error: "Could not update user position."});
+					}
+				});
+			}
+		} else {
+			res.send(403, {error: "You are not signed in."});
+		}
+		return next();
+	};
 }
 
 module.exports = new userModule();
