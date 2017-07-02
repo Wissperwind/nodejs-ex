@@ -18,21 +18,28 @@ function photoModule(){
 	console.log("Photos are in %s, this folder exists: "+fs.existsSync(that.photoDir), that.photoDir);
 	
 	that.findPhotoPathId = function(id, callback){
-		database.connection.query("SELECT * FROM photo WHERE id=?", [id], function(err, rows, fields){
-			if(!err){
-				for(var i=0; i<rows.length; i++){
-					var photo = {
-						id: rows[i].id,
-						path: rows[i].path + rows[i].id + ".jpg"
+		if(id == "defaultVenue"){
+			callback({
+				id: id,
+				path: id + ".jpg"
+			});
+		} else {
+			database.connection.query("SELECT * FROM photo WHERE id=?", [id], function(err, rows, fields){
+				if(!err){
+					for(var i=0; i<rows.length; i++){
+						var photo = {
+							id: rows[i].id,
+							path: rows[i].path + rows[i].id + ".jpg"
+						}
+						callback(photo);
+						return;
 					}
-					callback(photo);
-					return;
+				} else {
+					console.log("Error querying DB for photo");
 				}
-			} else {
-				console.log("Error querying DB for photo");
-			}
-			callback(null);
-		});
+				callback(null);
+			});
+		}
 	};
 	
 	that.findPhotoFile = function(path, callback){
@@ -54,6 +61,10 @@ function photoModule(){
 					var photoURL = that.serverAddress+"/photos/"+rows[i].id;
 					photos.push(photoURL);
 				}
+				// TODO default image if none was found for a venue
+				if(i == 0)
+					photos.push(that.serverAddress+"/photos/defaultVenue");
+					
 				callback(photos);
 				return;
 			} else {
@@ -130,6 +141,7 @@ function photoModule(){
 				res.send(404, {error: "Photo does not exist."});
 			}
 		});
+		return next();
 	};
 	
 	that.postPhotoVenue = function(req, res, next){
@@ -153,6 +165,7 @@ function photoModule(){
 		} else {
 			res.send(403, {error: "You are not signed in."});
 		}
+		return next();
 	};
 }
 

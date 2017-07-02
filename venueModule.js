@@ -174,10 +174,10 @@ function venueModule() {
 		if("keyword" in options){
 			qstr = "SELECT venues.*,categories FROM venues RIGHT JOIN (venuekind RIGHT JOIN (SELECT venuekind.venue_id,GROUP_CONCAT(venuekind.type SEPARATOR ', ') AS categories FROM venuekind GROUP BY venuekind.venue_id) AS tmp USING (venue_id)) ON (venue_id = venues.id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND (name LIKE ? OR type LIKE ?) GROUP BY id";
 			qarr.push("%" + options.keyword + "%"); qarr.push(options.keyword);
-		} else if("category" in options){
+		} /* else if("category" in options){
 			qstr = "SELECT venues.*,venuekind.type FROM venues RIGHT JOIN venuekind ON (venues.id = venuekind.venue_id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND type LIKE ? GROUP BY id";
 			qarr.push(options.category);
-		}
+		} */
 		
 		// TODO: query seems to be a square, maybe change to circle
 		database.connection.query(qstr, qarr, function(err, rows, field){
@@ -650,6 +650,7 @@ function venueModule() {
 		} else {
 			res.send(403, {error: "You are not signed in."});
 		}
+		return next();
 	};
 	/* that.checkIn = function(req, res, next){
 		if(req.user && req.user.id){
