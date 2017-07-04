@@ -21,7 +21,7 @@ server.on('uncaughtException', function (req, res, route, err) {
     console.log('uncaughtException', err.stack);
 });
 
-var loginModule = require('./loginModule');
+var authModule = require('./authModule');
 
 /* server.use(function(req, res, next){
 	console.log("-----Incoming request:");
@@ -33,10 +33,15 @@ var loginModule = require('./loginModule');
 	return next();
 }); */
 
-server.post('/signup', loginModule.signUp);
-
-server.post({url:'/login'}, loginModule.loginRoute);
-server.get({url:'/hello'}, loginModule.helloRoute);
+server.post('/signup', userModule.signUp);
+server.post({url:'/login'}, authModule.logIn);
+//use authModule.ensureAuthenticated() for each request requiring authentication
+// in order to return the error when user is not authenticated
+server.get({url:'/hello'}, authModule.ensureAuthenticated, authModule.helloRoute);
+server.get({url:'/account'}, authModule.ensureAuthenticated, userModule.getUserInfo);
+server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
+server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUser);
+server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.resetPassword);
 
 
 // should we reconsider the URLs? maybe:
