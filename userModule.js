@@ -4,7 +4,6 @@ function userModule(){
 	var cityModule = require('./cityModule');
 	var encryptUtils = require('./encryptUtils');
     //var nodemailer = require('nodemailer');
-    var mail = require("nodemailer").mail;
 
     createUser = function (user, callback){
         var hashResult = encryptUtils.hashPassword(user.password);
@@ -119,6 +118,8 @@ function userModule(){
     }
     that.resetPassword = function (req, res, next){
 
+        var mail = require("nodemailer").mail;
+
         mail({
             from: "Fred Foo ✔ <foo@blurdybloop.com>", // sender address
             to: "faaz.iqbal@gmail.com", // list of receivers
@@ -126,7 +127,6 @@ function userModule(){
             text: "Hello world ✔", // plaintext body
             html: "<b>Hello world ✔</b>" // html body
         });
-        return next();
     }
 
 
