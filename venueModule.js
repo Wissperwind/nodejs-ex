@@ -613,13 +613,13 @@ function venueModule() {
 			if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('rating')){
 				res.send(500, {error: "No venue or rating specified."});
 			} else {
-				checkinModule.checkIn(req.params.id, req.user.id, function(foo){
+				checkinModule.checkIn(req.body.id, req.user.id, function(foo){
 					if(foo){
-						that.findRating(req.params.id, req.user.id, function(rating){
+						that.findRating(req.body.id, req.user.id, function(rating){
 							if(!rating){
-								that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-									that.getAvgForVenue(req.params.id, function(avg){
-										that.updateVenueRating(req.params.id, avg, function(venue){
+								that.insertRating({venue: req.body.id, rating: req.body.rating, user: req.user.id}, function(rating){
+									that.getAvgForVenue(req.body.id, function(avg){
+										that.updateVenueRating(req.body.id, avg, function(venue){
 											if(!venue){
 												res.send(404, {error: "Venue does not exist."});
 											} else {
@@ -629,9 +629,9 @@ function venueModule() {
 									});
 								});
 							} else {
-								that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-									that.getAvgForVenue(req.params.id, function(avg){
-										that.updateVenueRating(req.params.id, avg, function(venue){
+								that.updateRating({venue: req.body.id, rating: req.body.rating, user: req.user.id}, function(rating){
+									that.getAvgForVenue(req.body.id, function(avg){
+										that.updateVenueRating(req.body.id, avg, function(venue){
 											if(!venue){
 												res.send(404, {error: "Venue does not exist."});
 											} else {
