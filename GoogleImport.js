@@ -76,14 +76,26 @@ function GoogleImporter(){
 							callback(null);
 						}
 					}); */
-					photoModule.downloadPhoto(request(options), function(photoId){
+					photoModule.addPhotoPathId(function (photo){
+						request(options).pipe(fs.createWriteStream(photo.path)).on('close', function(){
+							photoModule.addPhotoToVenue(id, photo.id, null, function(str){
+								if(str)
+									callback("OK");
+								else
+									callback(null);
+							});
+						});
+					});
+							
+							
+					/* photoModule.downloadPhoto(request(options), function(photoId){
 						photoModule.addPhotoToVenue(id, photoId, null, function(str){
 							if(str)
 								callback("OK");
 							else
 								callback(null);
 						});
-					});
+					}); */
 				} else {
 					console.log("File type not supported: " + res.headers["content-type"]);
 					callback(null);
