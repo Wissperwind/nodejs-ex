@@ -7,6 +7,7 @@ function GoogleImporter(){
 	//that.SEARCH_RADIUS = 500; //for testing
 	
 	const request = require('request');
+	var photoModule = require('./photoModule');
 	
 	that.convertToLatLng = function(str, callback){
 		
@@ -36,6 +37,63 @@ function GoogleImporter(){
 			}
 		});
 	}
+	
+	that.getVenuePhoto = function(id, ref, callback){
+		var options = {
+			method: 'GET',
+			uri: "https://maps.googleapis.com/maps/api/place/photo",
+			qs: {
+				key: GOOGLE_KEY,
+				photoreference: ref,
+				maxwidth: 400
+			}
+		};
+		
+		var optionsHead = {
+			method: 'HEAD',
+			uri: "https://maps.googleapis.com/maps/api/place/photo",
+			qs: {
+				key: GOOGLE_KEY,
+				photoreference: ref,
+				maxwidth: 400
+			}
+		};
+		
+		console.log("Getting photo for venue: " + id);
+		
+		request(optionsHead, function(err, res, body){
+			if(!err && res.statusCode == 200){
+				if(res.headers["content-type"] == "image/jpeg"){
+					/* photoModule.savePhoto(body, function(photoId){
+						if(photoId){
+							photoModule.addPhotoToVenue(id, photoId, null, function(str){
+								if(str)
+									callback("OK");
+								else
+									callback(null);
+							});
+						} else {
+							callback(null);
+						}
+					}); */
+					photoModule.downloadPhoto(request(options), function(photoId){
+						photoModule.addPhotoToVenue(id, photoId, null, function(str){
+							if(str)
+								callback("OK");
+							else
+								callback(null);
+						});
+					});
+				} else {
+					console.log("File type not supported: " + res.headers["content-type"]);
+					callback(null);
+				}
+			} else {
+				console.log("Status Code: " + res.statusCode);
+				callback(null)
+			}
+		});
+	};
 	
 	that.getVenueDetails = function(id, callback){
 		

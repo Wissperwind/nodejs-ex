@@ -126,6 +126,14 @@ function photoModule(){
 		});
 	};
 	
+	that.downloadPhoto = function(requestObject, callback){
+		that.addPhotoPathId(function (photo){
+			requestObject.pipe(fs.createWriteStream(photo.path)).on('close', function(){
+				callback(photo.id);
+			});
+		});
+	};
+	
 	that.getPhoto = function(req, res, next){
 		that.findPhotoPathId(req.params.id, function(photo){
 			if(photo){

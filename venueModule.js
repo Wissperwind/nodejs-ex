@@ -114,6 +114,22 @@ function venueModule() {
 			}
 		}
 		
+		function addVenuePhotos(id, refs, counter, callback){
+			if(counter<refs.length){
+				GoogleImport.getVenuePhoto(id, refs[counter], function(ok){
+					if(ok){
+						console.log("Added photo to venue " + id);
+						addVenuePhotos(id, refs, counter+1, callback);
+					} else {
+						console.log("Did not add photo to venue " + id);
+						addVenuePhotos(id, refs, counter+1, callback);
+					}
+				});
+			} else {
+				callback();
+			}
+		}
+		
 		if(venue != null){
 			var cityName = "Somewhere";
 			for(var i=0; i<venue.address_components.length;i++){
@@ -129,6 +145,13 @@ function venueModule() {
 					weekdayStr = "";
 					for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
 						weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + ",";
+					}
+				}
+				
+				var photoRefs = [];
+				if("photos" in venue){
+					for(var i = 0; i<venue.photos.length && i < 3; i++){
+						photoRefs.push(venue.photos[i].photo_reference);
 					}
 				}
 			
@@ -150,8 +173,11 @@ function venueModule() {
 				function(err, result){
 					if(!err) {
 						console.log("Inserted venue into DB: " + result.insertId);
-						addVenueTypes(result.insertId, venue.types, 0, function(){callback(venue);});
-						//callback(venue);
+						addVenueTypes(result.insertId, venue.types, 0, function(){
+							addVenuePhotos(result.insertId, photoRefs, 0, function(){
+								callback(venue);
+							});
+						});
 					} else {
 						console.log("Error trying to insert venue into database");
 						console.log(err);
@@ -172,7 +198,7 @@ function venueModule() {
 		console.log("Getting venues between " +that.getLatLon(lat, lng, dist, 180)[0]+","+that.getLatLon(lat, lng, dist, 270)[1]+" and "+that.getLatLon(lat, lng, dist, 0)[0]+","+that.getLatLon(lat, lng, dist, 90)[1]);
 		
 		if("keyword" in options){
-			qstr = "SELECT venues.*,categories FROM venues RIGHT JOIN (venuekind RIGHT JOIN (SELECT venuekind.venue_id,GROUP_CONCAT(venuekind.type SEPARATOR ', ') AS categories FROM venuekind GROUP BY venuekind.venue_id) AS tmp USING (venue_id)) ON (venue_id = venues.id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND (name LIKE ? OR type LIKE ?) GROUP BY id";
+			qstr = "SELECT venues.*,photo.id AS photoId,categories FROM venues LEFT JOIN venue_has_picture ON (venues.id = venue_has_picture.venueID) LEFT JOIN photo ON (venue_has_picture.photoID = photo.id) RIGHT JOIN (venuekind RIGHT JOIN (SELECT venuekind.venue_id,GROUP_CONCAT(venuekind.type SEPARATOR ', ') AS categories FROM venuekind GROUP BY venuekind.venue_id) AS tmp USING (venue_id)) ON (venue_id = venues.id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND (name LIKE ? OR type LIKE ?) GROUP BY venues.id";
 			qarr.push("%" + options.keyword + "%"); qarr.push(options.keyword);
 		} /* else if("category" in options){
 			qstr = "SELECT venues.*,venuekind.type FROM venues RIGHT JOIN venuekind ON (venues.id = venuekind.venue_id) WHERE lat>=? AND lat<=? AND lng>=? AND lng<=? AND type LIKE ? GROUP BY id";
@@ -199,7 +225,7 @@ function venueModule() {
 						venue.categories = rows[i].categories;
 						venue.rating = rows[i].rating;
 						venue.iconURL = rows[i].icon;
-						venue.imageURL = rows[i].icon;
+						venue.imageURL = rows[i].photoId ? photoModule.serverAddress + "/photos/" + rows[i].photoId : rows[i].icon;
 					}
 					
 					venues.push(venue);
@@ -280,7 +306,6 @@ function venueModule() {
 					
 					GoogleImport.getVenueDetails(ids[counter], function(details){
 						that.createVenue(details, function(venue){
-							//importAndUpload(ids, venues, counter+1, callback);
 							importAndUpload(ids, venues, counter+1, searchId);
 						});
 					});
@@ -288,9 +313,6 @@ function venueModule() {
 					importAndUpload(ids, venues, counter+1, searchId);
 				}
 			} else {
-				// callback should be getVenuesFromDB with USER_SEARCH_RADIUS
-				// after the new venues have been added to our DB (counter == ids.length)
-				//isAddingVenuesToDB = false
 				console.log("Search " + searchId + " is complete");
 				that.updateSearchComplete(searchId, function(id){
 					//console.log("Executing callback after adding last venue");
