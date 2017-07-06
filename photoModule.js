@@ -3,7 +3,8 @@ function photoModule(){
 	
 	var that = this;
 	
-	that.fs = require('fs');
+	var fs = require('fs');
+	that.fs = fs;
 	var database = require('./database');
 	
 	//that.photoDir = process.env.OPENSHIFT_DATA_DIR; //does not work...
