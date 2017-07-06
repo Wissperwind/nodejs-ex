@@ -247,7 +247,7 @@ function commentModule(){
 		if(req.user && req.user.id){
 			that.findRating(req.params.id, req.user.id, function(rating){
 				if(!rating){
-					that.insertRating({comment: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+					that.insertRating({comment: req.params.id, rating: req.body.rating, user: req.user.id}, function(rating){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
@@ -259,7 +259,7 @@ function commentModule(){
 						});
 					});
 				} else {
-					that.updateRating({comment: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
+					that.updateRating({comment: req.params.id, rating: req.body.rating, user: req.user.id}, function(rating){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
