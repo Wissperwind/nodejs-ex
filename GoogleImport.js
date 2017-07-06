@@ -77,7 +77,7 @@ function GoogleImporter(){
 						}
 					}); */
 					photoModule.addPhotoPathId(function (photo){
-						request(options).pipe(fs.createWriteStream(photo.path)).on('close', function(){
+						request(options).pipe(photoModule.fs.createWriteStream(photo.path)).on('close', function(){
 							photoModule.addPhotoToVenue(id, photo.id, null, function(str){
 								if(str)
 									callback("OK");
