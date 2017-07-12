@@ -260,10 +260,10 @@ function venueModule() {
 									comments: comments,
 									topvisitors: checkins,
 									address: rows[i].address,
-									phone: rows[i].phone,
-									website: rows[i].website,
+									phone: rows[i].phone == "Missing phone number" ? "-" : rows[i].phone,
+									website: rows[i].website == "Missing website" ? "-" : rows[i].website,
 									weekday_text: rows[i].weekday_text,
-									pricelevel: rows[i].price_level == "Missing price level" ? rows[i].price_level : "Price level "+rows[i].price_level+" of 4" //rows[i].price_level
+									pricelevel: rows[i].price_level == "Missing price level" ? "-" : "Price level "+rows[i].price_level+" of 4" //rows[i].price_level
 								};
 								callback(venue);
 								return;
