@@ -245,7 +245,7 @@ function venueModule() {
 		commentModule.findCommentsByVenue(id, function(comments){
 			checkinModule.findCheckinsByVenue(id, function(checkins){
 				photoModule.findPhotosOfVenue(id, function(photos){
-					database.connection.query("SELECT * FROM venues WHERE id=?", [id], function(err, rows, fields){
+					database.connection.query("SELECT *,categories FROM venues LEFT JOIN (SELECT venuekind.venue_id,GROUP_CONCAT(venuekind.type SEPARATOR ', ') AS categories FROM venuekind GROUP BY venuekind.venue_id) AS tmp ON (venues.id = tmp.venue_id) WHERE venues.id=?", [id], function(err, rows, fields){
 						if(!err){
 							for(var i=0; i<rows.length; i++){
 								console.log("Found venue: " + rows[i].name);
@@ -255,7 +255,7 @@ function venueModule() {
 									lat: rows[i].lat,
 									lng: rows[i].lng,
 									rating: rows[i].rating,
-									longdescription: ""+rows[i].address,
+									longdescription: ""+rows[i].categories+"\n"+rows[i].address+"\n"+rows[i].phone+"\n"+rows[i].website+"\n"+ (rows[i].price_level == "Missing price level" ? rows[i].price_level : "Price level "+rows[i].price_level+" of 4"),
 									images: photos,
 									comments: comments,
 									topvisitors: checkins
@@ -269,7 +269,8 @@ function venueModule() {
 								return;
 							}
 						} else {
-							console.log("Error querying DB for venue")
+							console.log("Error querying DB for venue");
+							console.log(err);
 						}
 						callback(null);
 					});
