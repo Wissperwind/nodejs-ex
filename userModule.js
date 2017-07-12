@@ -63,7 +63,8 @@ function userModule(){
 							"age": results[0].age,
 							"city": results[0].city,
 							"rank": checkins[0].count,
-							"url": photoUrl
+							"url": photoUrl,
+							"error": "false"
 						}
 						if( results[0].city === null ){
 							res.json(response);
@@ -76,6 +77,7 @@ function userModule(){
 
 					} else {
 						console.log(error.code);
+						res.send(500, {error: "Could not get user info."});
 					}
 				});
 			});
