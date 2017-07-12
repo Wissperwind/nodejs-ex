@@ -42,6 +42,7 @@ server.get({url:'/account'}, authModule.ensureAuthenticated, userModule.getUserI
 server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
 server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUser);
 server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.resetPassword);
+server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
 
 
 // should we reconsider the URLs? maybe:

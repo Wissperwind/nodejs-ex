@@ -2,6 +2,8 @@ function userModule(){
 	var that = this;
 	var database = require('./database');
 	var cityModule = require('./cityModule');
+	var checkinModule = require('./checkinModule');
+	var photoModule = require('./photoModule');
 	var encryptUtils = require('./encryptUtils');
     //var nodemailer = require('nodemailer');
     var mail = require("nodemailer").mail;
@@ -49,29 +51,35 @@ function userModule(){
         return next();
     }
     that.getUserInfo = function (req, res, next){
-        console.log('user id is:' + req.user.id)
-        database.connection.query('SELECT * FROM users WHERE id = ?', [req.user.id], function (error, results, fields) {
-            if (!error){
-                var response = {
-                    "username" : results[0].username,
-                    "realname": results[0].realName,//updated database to remove space in 'real Name'
-                    "email": results[0].eMail,//updated database to remove hyphen in 'e-Mail'
-                    "age": results[0].age,
-                    "city": results[0].city
-                }
-                if( results[0].city === null ){
-                    res.json(response);
-                } else {
-                    database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
-                        response.city = city_results[0].name;
-                        res.json(response);
-                    });
-                }
+        console.log('user id is:' + req.user.id);
+		checkinModule.findCheckinsByUser(req.user.id, function(checkins){
+			photoModule.findPhotoOfUser(req.user.id, function(photoUrl){
+				database.connection.query('SELECT * FROM users WHERE id = ?', [req.user.id], function (error, results, fields) {
+					if (!error){
+						var response = {
+							"username" : results[0].username,
+							"realname": results[0].realName,//updated database to remove space in 'real Name'
+							"email": results[0].eMail,//updated database to remove hyphen in 'e-Mail'
+							"age": results[0].age,
+							"city": results[0].city,
+							"rank": checkins[0].count,
+							"url": photoUrl
+						}
+						if( results[0].city === null ){
+							res.json(response);
+						} else {
+							database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
+								response.city = city_results[0].name;
+								res.json(response);
+							});
+						}
 
-            } else {
-                console.log(error.code);
-            }
-        });
+					} else {
+						console.log(error.code);
+					}
+				});
+			});
+		});
         return next();
     }
     that.updateUserInfo = function (req, res, next){

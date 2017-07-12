@@ -19,7 +19,7 @@ function photoModule(){
 	console.log("Photos are in %s, this folder exists: "+fs.existsSync(that.photoDir), that.photoDir);
 	
 	that.findPhotoPathId = function(id, callback){
-		if(id == "defaultVenue"){
+		if(id == "defaultVenue" || id == "defaultUser"){
 			callback({
 				id: id,
 				path: id + ".jpg"
@@ -62,14 +62,31 @@ function photoModule(){
 					var photoURL = that.serverAddress+"/photos/"+rows[i].id;
 					photos.push(photoURL);
 				}
-				// TODO default image if none was found for a venue
 				if(i == 0)
 					photos.push(that.serverAddress+"/photos/defaultVenue");
-					
 				callback(photos);
 				return;
 			} else {
 				console.log("Error querying DB for venue photos");
+			}
+			callback(null);
+		});
+	};
+	
+	that.findPhotoOfUser = function(id, callback){
+		database.connection.query("SELECT * FROM users WHERE id=? AND profilePicture IS NOT NULL", [id], function(err, rows, fields){
+			if(!err){
+				var photoURL = "";
+				for(var i=0; i<rows.length; i++){
+					photoURL = that.serverAddress+"/photos/"+rows[i].profilePicture;
+				}
+				if(i == 0)
+					photoURL = that.serverAddress+"/photos/defaultUser";
+				callback(photoURL);
+				return;
+			} else {
+				console.log("Error querying DB for user photo");
+				console.log(err);
 			}
 			callback(null);
 		});
@@ -127,13 +144,25 @@ function photoModule(){
 		});
 	};
 	
-	that.downloadPhoto = function(requestObject, callback){
+	that.addPhotoToUser = function(userId, photoId, callback){
+		database.connection.query("UPDATE users SET profilePicture=? WHERE id=?", [photoId, userId], function(err, result){
+			if(!err){
+				console.log("Added photo %s to user %s", photoId, userId);
+				callback("OK");
+			} else {
+				console.log("Error trying to insert photo for user");
+				callback(null);
+			}
+		});
+	};
+	
+/* 	that.downloadPhoto = function(requestObject, callback){
 		that.addPhotoPathId(function (photo){
 			requestObject.pipe(fs.createWriteStream(photo.path)).on('close', function(){
 				callback(photo.id);
 			});
 		});
-	};
+	}; */
 	
 	that.getPhoto = function(req, res, next){
 		that.findPhotoPathId(req.params.id, function(photo){
@@ -171,6 +200,26 @@ function photoModule(){
 					}
 				});
 			}
+		} else {
+			res.send(403, {error: "You are not signed in."});
+		}
+		return next();
+	};
+	
+	that.postPhotoUser = function(req, res, next){
+		if(req.user && req.user.id){
+			that.savePhoto(req.body, function(photoId){
+				if(photoId){
+					that.addPhotoToUser(req.user.id, photoId, function(str){
+						if(str)
+							res.send(200, {error: "false"});
+						else
+							res.send(500, {error: "Could not add photo to user."});
+					});
+				} else {
+					res.send(500, {error: "Could not save photo."});
+				}
+			});
 		} else {
 			res.send(403, {error: "You are not signed in."});
 		}
