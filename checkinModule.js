@@ -48,14 +48,15 @@ function checkinModule(){
 	};
 	
 	that.findCheckinsByUser = function(userId, callback){
-		database.connection.query("SELECT * FROM user_checkin_venue WHERE userID=?", [userId], function(err, rows, fields){
+		database.connection.query("SELECT *,SUM(checkin_count) AS count FROM user_checkin_venue WHERE userID=?", [userId], function(err, rows, fields){
 			if(!err){
 				var checkins = [];
 				for(var i=0; i<rows.length; i++){
 					var checkin = {
 						user: rows[i].userID,
 						venue: rows[i].venueID,
-						checkins: rows[i].checkin_count
+						checkins: rows[i].checkin_count,
+						count: rows[i].count
 					}
 					checkins.push(checkin);
 				}
