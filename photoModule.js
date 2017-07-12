@@ -186,6 +186,8 @@ function photoModule(){
 		if(req.user && req.user.id){
 			if(!req.params.id){
 				res.send(400, {error: "No venue was specified for photo upload."});
+			} else if(res.headers["content-type"] != "image/jpeg"){
+				res.send(400, {error: "Only JPEG images are allowed."});
 			} else {
 				that.savePhoto(req.body, function(photoId){
 					if(photoId){
@@ -208,18 +210,22 @@ function photoModule(){
 	
 	that.postPhotoUser = function(req, res, next){
 		if(req.user && req.user.id){
-			that.savePhoto(req.body, function(photoId){
-				if(photoId){
-					that.addPhotoToUser(req.user.id, photoId, function(str){
-						if(str)
-							res.send(200, {error: "false"});
-						else
-							res.send(500, {error: "Could not add photo to user."});
-					});
-				} else {
-					res.send(500, {error: "Could not save photo."});
-				}
-			});
+			if(res.headers["content-type"] != "image/jpeg"){
+				res.send(400, {error: "Only JPEG images are allowed."});
+			} else {
+				that.savePhoto(req.body, function(photoId){
+					if(photoId){
+						that.addPhotoToUser(req.user.id, photoId, function(str){
+							if(str)
+								res.send(200, {error: "false"});
+							else
+								res.send(500, {error: "Could not add photo to user."});
+						});
+					} else {
+						res.send(500, {error: "Could not save photo."});
+					}
+				});
+			}
 		} else {
 			res.send(403, {error: "You are not signed in."});
 		}
