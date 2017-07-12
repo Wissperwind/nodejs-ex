@@ -255,15 +255,15 @@ function venueModule() {
 									lat: rows[i].lat,
 									lng: rows[i].lng,
 									rating: rows[i].rating,
-									longdescription: ""+rows[i].categories+"\n"+rows[i].address+"\n"+rows[i].phone+"\n"+rows[i].website+"\n"+ (rows[i].price_level == "Missing price level" ? rows[i].price_level : "Price level "+rows[i].price_level+" of 4"),
+									categories: ""+rows[i].categories, //+"\n"+rows[i].address+"\n"+rows[i].phone+"\n"+rows[i].website+"\n"+ (rows[i].price_level == "Missing price level" ? rows[i].price_level : "Price level "+rows[i].price_level+" of 4"),
 									images: photos,
 									comments: comments,
-									topvisitors: checkins
-									//address: rows[i].address,
-									//phone: rows[i].phone,
-									//website: rows[i].website,
-									//weekday_text: rows[i].weekday_text,
-									//price_level: rows[i].price_level
+									topvisitors: checkins,
+									address: rows[i].address,
+									phone: rows[i].phone,
+									website: rows[i].website,
+									weekday_text: rows[i].weekday_text,
+									pricelevel: rows[i].price_level == "Missing price level" ? rows[i].price_level : "Price level "+rows[i].price_level+" of 4" //rows[i].price_level
 								};
 								callback(venue);
 								return;
