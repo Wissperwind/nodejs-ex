@@ -22,6 +22,7 @@ function photoModule(){
 		if(id == "defaultVenue" || id == "defaultUser"){
 			callback({
 				id: id,
+				format: ".jpg",
 				path: id + ".jpg"
 			});
 		} else {
@@ -30,7 +31,8 @@ function photoModule(){
 					for(var i=0; i<rows.length; i++){
 						var photo = {
 							id: rows[i].id,
-							path: rows[i].path + rows[i].id + ".jpg"
+							format: rows[i].format,
+							path: rows[i].path + rows[i].id + rows[i].format //".jpg"
 						}
 						callback(photo);
 						return;
@@ -92,12 +94,12 @@ function photoModule(){
 		});
 	};
 	
-	that.addPhotoPathId = function(callback){
-		database.connection.query("INSERT INTO photo SET path=?", [that.photoFilePath], function(err, result){
+	that.addPhotoPathId = function(format, callback){
+		database.connection.query("INSERT INTO photo SET path=?, format=?", [that.photoFilePath, format], function(err, result){
 			if(!err){
 				var photo = {
 					id: result.insertId,
-					path: that.photoFilePath + result.insertId + ".jpg"
+					path: that.photoFilePath + result.insertId + format //".jpg"
 				};
 				//photo.id = result.insertId;
 				//photo.path = that.photoFilePath + photo.id + ".jpg";
@@ -121,8 +123,8 @@ function photoModule(){
 		});
 	};
 	
-	that.savePhoto = function(photoFile, callback){
-		that.addPhotoPathId(function(photo) {
+	that.savePhoto = function(photoFile, format, callback){
+		that.addPhotoPathId(format, function(photo) {
 			that.addPhotoFile(photoFile, photo.path, function(str){
 				if(str)
 					callback(photo.id);
@@ -169,7 +171,7 @@ function photoModule(){
 			if(photo){
 				that.findPhotoFile(photo.path, function(file){
 					if(file){
-						res.setHeader("Content-Type", "image/jpeg");
+						res.setHeader("Content-Type", photo.format == ".jpg" ? "image/jpeg" : "image/png");
 						res.setHeader("Content-Disposition", "inline;filename=\"photo"+photo.id+"\"");
 						res.send(200, file);
 					} else
@@ -186,10 +188,10 @@ function photoModule(){
 		if(req.user && req.user.id){
 			if(!req.params.id){
 				res.send(400, {error: "No venue was specified for photo upload."});
-			} else if(res.headers["content-type"] != "image/jpeg"){
-				res.send(400, {error: "Only JPEG images are allowed."});
+			} else if(req.headers["content-type"] != "image/jpeg" && req.headers["content-type"] != "image/png"){
+				res.send(400, {error: "Only JPEG and PNG images are allowed."});
 			} else {
-				that.savePhoto(req.body, function(photoId){
+				that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
 					if(photoId){
 						that.addPhotoToVenue(req.params.id, photoId, req.user.id, function(str){
 							if(str)
@@ -210,10 +212,10 @@ function photoModule(){
 	
 	that.postPhotoUser = function(req, res, next){
 		if(req.user && req.user.id){
-			if(res.headers["content-type"] != "image/jpeg"){
-				res.send(400, {error: "Only JPEG images are allowed."});
+			if(req.headers["content-type"] != "image/jpeg" && req.headers["content-type"] != "image/png"){
+				res.send(400, {error: "Only JPEG and PNG images are allowed."});
 			} else {
-				that.savePhoto(req.body, function(photoId){
+				that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
 					if(photoId){
 						that.addPhotoToUser(req.user.id, photoId, function(str){
 							if(str)
