@@ -61,8 +61,8 @@ function userModule(){
 							"realname": results[0].realName,//updated database to remove space in 'real Name'
 							"email": results[0].eMail,//updated database to remove hyphen in 'e-Mail'
 							"age": results[0].age,
-							"city": results[0].city,
-							"rank": checkins[0].count,
+							"city": results[0].city ? results[0].city : "",
+							"rank": checkins[0].count ? checkins[0].count : 0,
 							"url": photoUrl,
 							"error": "false"
 						}
