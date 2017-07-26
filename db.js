@@ -32,7 +32,7 @@ function dbConnection() {
             'e-Mail': user.email,
             'passworthash': hashResult.hash,
             'salt': hashResult.salt,
-            'city': 1//foreign key issue forcing to add a default city
+            'city': 1//foreign key issue forcing to add a default city ----- TODO: Do this correctly
         };
         var query = connection.query('INSERT INTO users SET ?', post, function (error, results, fields) {
             if (!error){

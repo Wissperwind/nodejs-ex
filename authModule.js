@@ -19,10 +19,10 @@ function authModule() {
                     if( encryptUtils.isPasswordCorrect(results[0].passworthash, results[0].salt, password) ){
                         return done(null, {id:results[0].id, username:username});
                     } else {
-                        return done(null, false, { error: 'Incorrect password.' });
+                        return done(null, false, { error: 'Incorrect password!' });
                     }
                 } else {
-                    return done(null, false, { error: 'Incorrect username' });
+                    return done(null, false, { error: 'Incorrect username!' });
                 }
             } else {
                 console.log('no result')
@@ -47,16 +47,6 @@ function authModule() {
     server.use(passport.initialize());
     // Set up the passport session
     server.use(passport.session());
-
-    // passport.serializeUser(function(user, done) {
-    //     done(null, user);
-    // });
-    //
-    // passport.deserializeUser(function(id, done) {
-    //     //console.log(id)
-    //     // Look the user up in the database and return the user object
-    //     return done(null, id);
-    // });
     
     passport.serializeUser(function(user, done) {
         done(null, user.id);
@@ -73,13 +63,13 @@ function authModule() {
     that.logIn = function(req, res, next) {
 
         // The local login strategy
-        passport.authenticate('local', function(err, user) {
+        passport.authenticate('local', function(err, user, info) {
             if (err) {
                 return next(err);
             }
 
             if(!user) {
-                res.json({"authenticated" : false});
+                res.json({"error" : info.error});
                 return next();
             }
 
@@ -91,10 +81,9 @@ function authModule() {
                 req.session.user_id = req.user.id;
 
                 if(user.username) {
-                    res.json({"authenticated" : true});
+                    res.json({"error" : "false"});
                     return next();
                 }
-                res.json({ success: 'Welcome!'});
                 return next();
             });
         })(req, res, next);
