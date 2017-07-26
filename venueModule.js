@@ -353,7 +353,7 @@ function venueModule() {
 			// If previous searches were found, check them
 			for(i=0; i<circles.length; i++){
 				var circle = circles[i];
-				dist = circle.radius - radius; //USER_SEARCH_RADIUS;
+				dist = circle.radius - radius + 100; //USER_SEARCH_RADIUS;
 				// As soon as we are fully inside one of our previous searches, we do not need to scan Google Places
 				// and can use what's inside our DB
 				if(getDistanceInMeters(lat, lng, circle.lat, circle.lng) <= dist){
@@ -472,7 +472,7 @@ function venueModule() {
 					lat = ll.lat;
 					lng = ll.lng;
 					radius = req.params.radius;
-					doSearch(lat, lng, radius);
+					doSearch(lat, lng, 2000);
 				} else {
 					console.log("Could not convert city to coordinates");
 					//res.send(500, "Could not convert city to coordinates");
