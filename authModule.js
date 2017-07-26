@@ -79,7 +79,7 @@ function authModule() {
             }
 
             if(!user) {
-                res.json({"authenticated" : false});
+                res.json({"error" : "User does not exist"});
                 return next();
             }
 
@@ -91,10 +91,9 @@ function authModule() {
                 req.session.user_id = req.user.id;
 
                 if(user.username) {
-                    res.json({"authenticated" : true});
+                    res.json({"error" : "false"});
                     return next();
                 }
-                res.json({ success: 'Welcome!'});
                 return next();
             });
         })(req, res, next);
