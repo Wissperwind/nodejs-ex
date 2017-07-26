@@ -73,13 +73,13 @@ function authModule() {
     that.logIn = function(req, res, next) {
 
         // The local login strategy
-        passport.authenticate('local', function(err, user) {
+        passport.authenticate('local', function(err, user, info) {
             if (err) {
                 return next(err);
             }
 
             if(!user) {
-                res.json({"error" : "User does not exist"});
+                res.json({"error" : info.error});
                 return next();
             }
 
