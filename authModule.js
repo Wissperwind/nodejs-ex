@@ -47,16 +47,6 @@ function authModule() {
     server.use(passport.initialize());
     // Set up the passport session
     server.use(passport.session());
-
-    // passport.serializeUser(function(user, done) {
-    //     done(null, user);
-    // });
-    //
-    // passport.deserializeUser(function(id, done) {
-    //     //console.log(id)
-    //     // Look the user up in the database and return the user object
-    //     return done(null, id);
-    // });
     
     passport.serializeUser(function(user, done) {
         done(null, user.id);
