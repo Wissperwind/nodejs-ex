@@ -19,10 +19,10 @@ function authModule() {
                     if( encryptUtils.isPasswordCorrect(results[0].passworthash, results[0].salt, password) ){
                         return done(null, {id:results[0].id, username:username});
                     } else {
-                        return done(null, false, { error: 'Incorrect password.' });
+                        return done(null, false, { error: 'Incorrect password!' });
                     }
                 } else {
-                    return done(null, false, { error: 'Incorrect username' });
+                    return done(null, false, { error: 'Incorrect username!' });
                 }
             } else {
                 console.log('no result')
