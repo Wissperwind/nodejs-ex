@@ -57,6 +57,8 @@ function highscoreModule() {
 		});
 			
 			
+		return next();
+	};
 	
 	
 	
