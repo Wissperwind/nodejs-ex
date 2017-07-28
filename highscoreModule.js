@@ -5,7 +5,7 @@ function highscoreModule() {
 
 
 
-	that.getList = function (req, res, next){
+	that.loadList = function(callback){
 		
 		query = "SELECT username, COUNT(username) AS amount FROM users, user_checkin_venue WHERE users.id = user_checkin_venue.userID GROUP BY username ORDER BY COUNT(username)";
 			database.connection.query(
@@ -35,6 +35,39 @@ function highscoreModule() {
 			
 		};
 		
+	
+	
+	that.getList = function(req, res, next){
+	
+	
+		that.loadList(function(completeList){
+			
+			if(completeList != null) {
+					
+				if(completeList.length > 0)
+					
+					res.send(200, {completeList: completeList, error: "false"});
+				else
+					
+					res.send(404, {completeList: [], error: "No high score found."});
+			
+			} else {
+				
+				res.send(500, {completeList: [], error: "There was an error."}); 
+			}
+			
+		});
+			
+			
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	};
 
 module.exports = new highscoreModule();
