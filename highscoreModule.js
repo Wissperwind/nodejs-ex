@@ -44,15 +44,13 @@ function highscoreModule() {
 			
 			if(completeList != null) {
 					
-				if(completeList.length > 0)
-					
+				if(completeList.length > 0) {
 					res.send(200, {completeList: completeList, error: "false"});
-				else
-					
-					res.send(404, {completeList: [], error: "No high score found."});
-			
-			} else {
 				
+				} else {
+					res.send(404, {completeList: [], error: "No high score found."});
+				}
+			} else {
 				res.send(500, {completeList: [], error: "There was an error."}); 
 			}
 			
