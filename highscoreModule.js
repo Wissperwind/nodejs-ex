@@ -60,12 +60,6 @@ function highscoreModule() {
 	
 	
 	
-	
-	
-	
-	
-	
-	
 	};
 
 module.exports = new highscoreModule();
