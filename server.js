@@ -39,11 +39,21 @@ server.post({url:'/login'}, authModule.logIn);
 //use authModule.ensureAuthenticated() for each request requiring authentication
 // in order to return the error when user is not authenticated
 server.get({url:'/hello'}, authModule.ensureAuthenticated, authModule.helloRoute);
+server.get({url:'/logout'}, authModule.ensureAuthenticated, function (req, res, next) {
+    req.session.destroy();
+    res.json({
+        "error": 'false'
+    });
+    return next();
+});
 server.get({url:'/account'}, authModule.ensureAuthenticated, userModule.getUserInfo);
 server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
 server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUser);
-server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.resetPassword);
 server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
+server.get({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.getPasswordResetToken); //For logged out users
+server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged out users
+server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged in users
+server.put({url:'/pw'}, userModule.updatePassword); //For logged in users
 
 server.get({url:'/highscorelist'}, highscoreModule.getList);
 
@@ -54,7 +64,6 @@ server.get({url:'/highscorelist'}, highscoreModule.getList);
 // /venues/<venueID>/comments/<userID>
 // /venues/<venueID>/ratings/<userID>
 // ...
-
 
 
 //server.get('venues/position/:latlng',	venueModule.getVenues); // deprecated; latlng should be "lat,lng", split did not work with #
