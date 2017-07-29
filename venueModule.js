@@ -144,7 +144,7 @@ function venueModule() {
 				if(("opening_hours" in venue) && ("weekday_text" in venue.opening_hours)){
 					weekdayStr = "";
 					for (var i = 0; i<venue.opening_hours.weekday_text.length; i++){
-						weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + ",";
+						weekdayStr = weekdayStr + venue.opening_hours.weekday_text[i] + "\n"; //",";
 					}
 				}
 				
