@@ -5,6 +5,7 @@ var venueModule = require('./venueModule');
 var userModule = require('./userModule');
 var commentModule = require('./commentModule');
 var photoModule = require('./photoModule');
+var highscoreModule = require('./highscoreModule');
 
 const port = 8080;
 
@@ -53,6 +54,8 @@ server.get({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.getPassw
 server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged out users
 server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged in users
 server.put({url:'/pw'}, userModule.updatePassword); //For logged in users
+
+server.get({url:'/highscorelist'}, highscoreModule.getList);
 
 
 // should we reconsider the URLs? maybe:

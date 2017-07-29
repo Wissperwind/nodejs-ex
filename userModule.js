@@ -60,8 +60,8 @@ function userModule(){
 							"realname": results[0].realName,
 							"email": results[0].eMail,
 							"age": results[0].age,
-							"city": results[0].city,
-							"rank": checkins[0].count,
+							"city": results[0].city ? results[0].city : "",
+							"rank": checkins[0].count ? checkins[0].count : 0,
 							"url": photoUrl,
 							"error": "false"
 						}

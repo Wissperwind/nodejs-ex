@@ -63,7 +63,7 @@ function GoogleImporter(){
 		
 		request(optionsHead, function(err, res, body){
 			if(!err && res.statusCode == 200){
-				if(res.headers["content-type"] == "image/jpeg"){
+				if(res.headers["content-type"] == "image/jpeg" || res.headers["content-type"] == "image/png"){
 					/* photoModule.savePhoto(body, function(photoId){
 						if(photoId){
 							photoModule.addPhotoToVenue(id, photoId, null, function(str){
@@ -76,7 +76,7 @@ function GoogleImporter(){
 							callback(null);
 						}
 					}); */
-					photoModule.addPhotoPathId(function (photo){
+					photoModule.addPhotoPathId(res.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function (photo){
 						request(options).pipe(photoModule.fs.createWriteStream(photo.path)).on('close', function(){
 							photoModule.addPhotoToVenue(id, photo.id, null, function(str){
 								if(str)
