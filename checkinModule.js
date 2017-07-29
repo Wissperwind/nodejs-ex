@@ -26,7 +26,7 @@ function checkinModule(){
 	};
 	
 	that.findCheckinsByVenue = function(venueId, callback){
-		database.connection.query("SELECT * FROM user_checkin_venue LEFT JOIN users ON (userID = id) WHERE venueID=? ORDER BY checkin_count DESC LIMIT 5", [venueId], function(err, rows, fields){
+		database.connection.query("SELECT * FROM user_checkin_venue LEFT JOIN users ON (userID = id) WHERE venueID=? ORDER BY checkin_count DESC", [venueId], function(err, rows, fields){
 			if(!err){
 				var checkins = [];
 				for(var i=0; i<rows.length; i++){
