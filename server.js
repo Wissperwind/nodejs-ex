@@ -46,7 +46,8 @@ server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUs
 
 server.post({url:'/friends'},authModule.ensureAuthenticated, friendModule.postfriend);
 server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUserfriend);
-server.del({url:'/friends'},authModule.ensureAuthenticated, friendModule.deleteUser);
+server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
+
 
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
 server.get({url:'/chat'},authModule.ensureAuthenticated, chat.getchat);
