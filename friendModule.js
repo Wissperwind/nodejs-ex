@@ -55,11 +55,12 @@ function userModule(){
 
 
     that.deleteUser = function (req, res, next){
-			if( !req.body.hasOwnProperty('friendid') ){
+			var friendid= req.params.friendid;
+			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
         var query = 'DELETE FROM user_friendship WHERE user_a = ? and user_b =?';console.log('in delete')
-        database.connection.query(query, [req.user.id,req.body.friendid], function (error, results, fields) {
+        database.connection.query(query, [req.user.id,friendid], function (error, results, fields) {
             if (!error){
                 console.log(results.affectedRows + " record deleted");
                 req.session.destroy();
