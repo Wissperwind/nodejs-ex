@@ -9,11 +9,12 @@ function userModule(){
     var mail = require("nodemailer").mail;
 
     that.getchat = function (req, res, next){
-			if( !req.body.hasOwnProperty('friendid') ){
+			var friendid= req.params.friendid;
+			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
 				database.connection.query('SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) and (user_a = ? and user_b = ?)',
-				 [req.user.id,req.body.friendid,req.body.friendid,req.user.id], function (error, results, fields) {
+				 [req.user.id,friendid,friendid,req.user.id], function (error, results, fields) {
 					if (!error){
 
 							res.json(results);
