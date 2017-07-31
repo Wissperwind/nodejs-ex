@@ -36,7 +36,7 @@ function userModule(){
 				var post  = {
 						'user_a': req.user.id,
 						'user_b': req.body.friendid ,
-						'message':
+						'message': req.body.message
 				};
 				var query = database.connection.query('INSERT INTO user_chat SET ?', post, function (error, results, fields) {
 						if (!error){
