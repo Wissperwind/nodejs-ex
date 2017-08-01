@@ -7,7 +7,7 @@ function highscoreModule() {
 
 	that.loadList = function(callback){
 		
-		query = "SELECT username, COUNT(username) AS amount FROM users, user_checkin_venue WHERE users.id = user_checkin_venue.userID GROUP BY username ORDER BY COUNT(username)";
+		query = "SELECT username, COUNT(username) AS amount FROM users, user_checkin_venue WHERE users.id = user_checkin_venue.userID GROUP BY username ORDER BY COUNT(username) DESC";
 			database.connection.query(
 			query,
 			[],function(err, rows, field){
