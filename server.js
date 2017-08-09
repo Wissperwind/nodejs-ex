@@ -50,7 +50,8 @@ server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModu
 
 
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
-server.get({url:'/chat/:friendid'},authModule.ensureAuthenticated, chat.getchat);
+//server.get({url:'/chat/:friendid'},authModule.ensureAuthenticated, chat.getchat);
+server.get({url:'/chat'},authModule.ensureAuthenticated, chat.getchat);
 server.get({url:'/friendprofile'},authModule.ensureAuthenticated, chat.getUserInfo);
 
 server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
