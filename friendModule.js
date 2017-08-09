@@ -107,18 +107,18 @@ function userModule(){
 			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-        var query = 'DELETE FROM user_friendship WHERE user_a = ? and user_b =?';console.log('in delete')
+        var query = 'DELETE FROM user_friendship WHERE user_a = ? and user_b =?';//console.log('in delete')
         database.connection.query(query, [req.user.id,friendid], function (error, results, fields) {
             if (!error){
                 console.log(results.affectedRows + " record deleted");
-                req.session.destroy();
+                //req.session.destroy();
                 res.json({
                     "error": 'false'
                 });
             } else {
                 console.log(error.code);
                 res.json({
-                    "error": error.code
+                    "error": "Friend could not be unfriended"//error.code
                 });
             }
         });
