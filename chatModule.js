@@ -62,33 +62,36 @@ function userModule(){
 
 
 		that.getUserInfo = function (req, res, next){
-
-			if( !req.body.hasOwnProperty('userid') ){
+			if( !req.params.hasOwnProperty('userid') ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
 
-		checkinModule.findCheckinsByUser(userid, function(checkins){
-			photoModule.findPhotoOfUser(userid, function(photoUrl){
-				database.connection.query('SELECT * FROM users WHERE id = ?', [req.body.userid], function (error, results, fields) {
+		checkinModule.findCheckinsByUser(req.params.userid, function(checkins){
+			photoModule.findPhotoOfUser(req.params.userid, function(photoUrl){
+				database.connection.query('SELECT * FROM users WHERE id = ?', [req.params.userid], function (error, results, fields) {
 					if (!error){
 						var response = {
-							"username" : results[0].username,
+							"id": req.params.userid,
+							"name" : results[0].username,
 							"realname": results[0].realName,//updated database to remove space in 'real Name'
 							"email": results[0].eMail,//updated database to remove hyphen in 'e-Mail'
 							"age": results[0].age,
-							"city": results[0].city,
-							"rank": checkins[0].count,
+							"city": results[0].city  ? results[0].city : "",
+							"rank": checkins[0].count ? checkins[0].count : 0,
 							"url": photoUrl,
+							"lat": results[0].lastLat,
+							"lng": results[0].lastLong,
 							"error": "false"
 						}
-						if( results[0].city === null ){
-							res.json(response);
-						} else {
-							database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
-								response.city = city_results[0].name;
-								res.json(response);
-							});
-						}
+						res.send(200, response);
+						// if( results[0].city === null ){
+							// res.json(response);
+						// } else {
+							// database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
+								// response.city = city_results[0].name;
+								// res.json(response);
+							// });
+						// }
 
 					} else {
 						console.log(error.code);
