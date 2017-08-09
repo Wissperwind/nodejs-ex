@@ -13,19 +13,21 @@ function userModule(){
 			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-				database.connection.query('SELECT *,UNIX_TIMESTAMP(user_chat.changed) AS date FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
+				//database.connection.query('SELECT *,UNIX_TIMESTAMP(user_chat.changed) AS date FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
+				database.connection.query('SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
 				 [req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
 					if (!error){
 						var messages = [];
 						for(var i=0; i<results.length; i++){
 							var date = new Date(results[i].date*1000);
 							var message = {
-								year: date.getFullYear(),
-								month: date.getMonth(),
-								day: date.getDate(),
-								hour: date.getHours(),
-								minute: date.getMinutes(),
-								second: date.getSeconds(),
+								// year: date.getFullYear(),
+								// month: date.getMonth() + 1,
+								// day: date.getDate(),
+								// hour: date.getHours(),
+								// minute: date.getMinutes(),
+								// second: date.getSeconds(),
+								timestamp: results[i].timestamp,
 								text: results[i].message,
 								owncomment: results[i].user_a == req.user.id
 							};
@@ -47,14 +49,15 @@ function userModule(){
 
 		that.postchat = function (req, res, next){
 
-			//if( !req.body.hasOwnProperty('friendid') || !req.body.hasOwnProperty('text') || !req.body.hasOwnProperty('timestamp')){
-			if( !req.body.hasOwnProperty('friendid') || !req.body.hasOwnProperty('text')){
+			if( !req.body.hasOwnProperty('friendid') || !req.body.hasOwnProperty('text') || !req.body.hasOwnProperty('timestamp')){
+			//if( !req.body.hasOwnProperty('friendid') || !req.body.hasOwnProperty('text')){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
 				var post  = {
 						'user_a': req.user.id,
 						'user_b': req.body.friendid,
-						'message': req.body.text
+						'message': req.body.text,
+						'timestamp': req.body.timestamp
 				};
 				var query = database.connection.query('INSERT INTO user_chat SET ?', post, function (error, results, fields) {
 						if (!error){
