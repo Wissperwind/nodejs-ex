@@ -15,6 +15,10 @@ function userModule(){
 			} else {
 				if (req.body.hasOwnProperty('commentid')){
 					commentModule.findComment(req.body.commentid, function(comment){
+						if(comment.user == req.user.id){
+							res.send(400, {error: "You can't make friends with yourself"});
+							return next();
+						}
 						var post  = {
 							'user_a': req.user.id,
 							'user_b': comment.user
@@ -39,6 +43,10 @@ function userModule(){
 						});
 					});
 				} else{
+					if(req.body.userid == req.user.id){
+						res.send(400, {error: "You can't make friends with yourself"});
+						return next();
+					}
 					var post  = {
 						'user_a': req.user.id,
 						'user_b': req.body.userid
