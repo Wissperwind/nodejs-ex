@@ -3,6 +3,7 @@ function userModule(){
 	var database = require('./database');
 	var cityModule = require('./cityModule');
 	var checkinModule = require('./checkinModule');
+	var commentModule = require('./commentModule');
 	var photoModule = require('./photoModule');
 	var encryptUtils = require('./encryptUtils');
     //var nodemailer = require('nodemailer');
@@ -12,40 +13,79 @@ function userModule(){
 			if( !req.body.hasOwnProperty('userid') && !req.body.hasOwnProperty('commentid') ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-        var post  = {
-            'user_a': req.user.id,
-            'user_b': req.body.userid || req.body.commentid
-        };
-        var query = database.connection.query('INSERT INTO user_friendship SET ?', post, function (error, results, fields) {
-            if (!error){
-                console.log('Last insert ', results);
-                response = {
-                    "error": 'false'
-                };
-                res.send(results);
-            } else {
+				if (req.body.hasOwnProperty('commentid')){
+					commentModule.findComment(req.body.commentid, function(comment){
+						var post  = {
+							'user_a': req.user.id,
+							'user_b': comment.user
+						};
+						var query = database.connection.query('INSERT INTO user_friendship SET ?', post, function (error, results, fields) {
+							if (!error){
+								console.log('Last insert ', results);
+								response = {
+									"error": 'false'
+								};
+								res.send(response);
+							} else {
+								console.log(error);
+								console.log(error.code)
+								response = null;
+								if(error.code === 'ER_DUP_ENTRY')
+									response = {
+										"error": "You are already friends"
+									};
+								res.send(response);
+							}
+						});
+					});
+				} else{
+					var post  = {
+						'user_a': req.user.id,
+						'user_b': req.body.userid
+					};
+					var query = database.connection.query('INSERT INTO user_friendship SET ?', post, function (error, results, fields) {
+						if (!error){
+							console.log('Last insert ', results);
+							response = {
+								"error": 'false'
+							};
+							res.send(response);
+						} else {
 							console.log(error);
-                console.log(error.code)
-                response = null;
-                if(error.code === 'ER_DUP_ENTRY')
-                    response = {
-                        "error": "User already exists"
-                    };
-                res.send(response);
-            }
-        });
+							console.log(error.code)
+							response = null;
+							if(error.code === 'ER_DUP_ENTRY')
+								response = {
+									"error": "You are already friends"
+								};
+							res.send(response);
+						}
+					});
+				}
 			}
-    }
+		}
     that.getUserfriend = function (req, res, next){
-				database.connection.query('SELECT * FROM user_friendship WHERE user_a = ? ', [req.user.id], function (error, results, fields) {
+				database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_b = id) WHERE user_a = ? ', [req.user.id], function (error, rows, fields) {
 					if (!error){
+						var friends = [];
+						for(var i=0; i<rows.length; i++){
+							var friend = {
+								id: rows[i].id,
+								name: rows[i].username,
+								realname: rows[i].realName,
+								lat: rows[i].lastLat,
+								lng: rows[i].lastLong
+							}
+							friends.push(friend);
+						}
+						res.send(200, {error: "false", friends: friends});
 
-							res.json(results);
+							//res.json(results);
 
 
 					} else {
 						console.log(error.code);
-						res.send(500, {error: "Could not get user info."});
+						res.send(500, {error: "Could not get user friends."});
 					}
 				});
 
