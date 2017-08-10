@@ -73,9 +73,10 @@ function userModule(){
 			}
 		}
     that.getUserfriend = function (req, res, next){
-				database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_b = id) WHERE user_a = ? ', [req.user.id], function (error, rows, fields) {
+				database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_b = id) WHERE user_a = ?', [req.user.id], function (error, rows, fields) {
 					if (!error){
-						var friends = [];
+						//var friends = [];
+						var friends = {};
 						for(var i=0; i<rows.length; i++){
 							var friend = {
 								id: rows[i].id,
@@ -84,9 +85,27 @@ function userModule(){
 								lat: rows[i].lastLat,
 								lng: rows[i].lastLong
 							}
-							friends.push(friend);
+							//friends.push(friend);
+							friends[friend.id] = friend;
 						}
-						res.send(200, {error: "false", friends: friends});
+						database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_a = id) WHERE user_b = ?', [req.user.id], function (err, rows2, fields2) {
+							for(var i=0; i<rows2.length; i++){
+								var friend = {
+									id: rows2[i].id,
+									name: rows2[i].username,
+									realname: rows2[i].realName,
+									lat: rows2[i].lastLat,
+									lng: rows2[i].lastLong
+								}
+								//friends.push(friend);
+								friends[friend.id] = friend;
+							}
+							var friendslist = [];
+							for(var i in friends)
+								friendslist.push(friends[i]);
+							
+							res.send(200, {error: "false", friends: friendslist});
+						});
 
 							//res.json(results);
 
