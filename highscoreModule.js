@@ -48,10 +48,10 @@ function highscoreModule() {
 					res.send(200, {completeList: completeList, error: "false"});
 				
 				} else {
-					res.send(404, {completeList: [], error: "No high score found."});
+					res.send(404, {completeList: [], error: "No high score found"});
 				}
 			} else {
-				res.send(500, {completeList: [], error: "There was an error."}); 
+				res.send(500, {completeList: [], error: "There was an error"}); 
 			}
 			
 		});

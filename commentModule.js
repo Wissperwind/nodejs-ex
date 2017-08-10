@@ -198,7 +198,7 @@ function commentModule(){
 		
 		if(req.user && req.user.id && req.user.username){
 			if(!req.body.hasOwnProperty('comment') || !req.body.hasOwnProperty('venueid')){
-				res.send(400, {error: "No comment text or venue specified."});
+				res.send(400, {error: "No comment text or venue specified"});
 			} else {
 				var comment = {
 					user: req.user.id,
@@ -213,7 +213,7 @@ function commentModule(){
 				});
 			}
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};
@@ -222,23 +222,23 @@ function commentModule(){
 		if(req.user && req.user.id){
 			that.findComment(req.params.id, function(comment){
 				if(!comment){
-					res.send(404, {error: "This comment does not exist."});
+					res.send(404, {error: "This comment does not exist"});
 				} else {
 					if(comment.user == req.user.id){
 						that.removeComment(req.params.id, function(result){
 							if(!result){
-								res.send(404, {error: "This comment does not exist."});
+								res.send(404, {error: "This comment does not exist"});
 							} else {
 								res.send(200, {error: "false"});
 							}
 						});
 					} else {
-						res.send(403, {error: "This is not your comment."});
+						res.send(403, {error: "This is not your comment"});
 					}
 				}
 			});
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};
@@ -251,7 +251,7 @@ function commentModule(){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
-									res.send(404, {error: "This comment does not exist."});
+									res.send(404, {error: "This comment does not exist"});
 								} else {
 									res.send(200, {error: "false"});
 								}
@@ -263,7 +263,7 @@ function commentModule(){
 						that.getScoreForComment(req.params.id, function(score){
 							that.updateCommentRating(req.params.id, score, function(comment){
 								if(!comment){
-									res.send(404, {error: "This comment does not exist."});
+									res.send(404, {error: "This comment does not exist"});
 								} else {
 									res.send(200, {error: "false"});
 								}
@@ -273,7 +273,7 @@ function commentModule(){
 				}
 			});
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};

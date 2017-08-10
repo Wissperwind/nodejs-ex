@@ -40,7 +40,7 @@ function userModule(){
 
 					} else {
 						console.log(error.code);
-						res.send(500, {error: "Could not find the chat with your friend."});
+						res.send(500, {error: "Could not find the chat with your friend"});
 					}
 				});
 }
@@ -72,7 +72,7 @@ function userModule(){
 								response = null;
 								if(error.code === 'ER_DUP_ENTRY')
 										response = {
-												"error": "User already exists"
+												"error": "There was an error with the chat"
 										};
 								res.send(response);
 						}
@@ -115,7 +115,7 @@ function userModule(){
 
 					} else {
 						console.log(error.code);
-						res.send(500, {error: "Could not get user info."});
+						res.send(500, {error: "Could not get user info"});
 					}
 				});
 			});

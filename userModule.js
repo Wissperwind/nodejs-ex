@@ -76,7 +76,7 @@ function userModule(){
 
 					} else {
 						console.log(error.code);
-						res.send(500, {error: "Could not get user info."});
+						res.send(500, {error: "Could not get user info"});
 					}
 				});
 			});
@@ -183,7 +183,7 @@ function userModule(){
                             });
                         } else {
                             console.log(error.code);
-                            res.send(500, {error: "Could not get user info!"});
+                            res.send(500, {error: "Could not get user info"});
                         }
                     });
                 } else {
@@ -288,12 +288,12 @@ function userModule(){
                     if(id){
                         res.send(200, {error: "false"});
                     } else {
-                        res.send(500, {error: "Could not update user position."});
+                        res.send(500, {error: "Could not update user position"});
                     }
                 });
             }
         } else {
-            res.send(403, {error: "You are not signed in."});
+            res.send(403, {error: "You are not signed in"});
         }
         return next();
     };

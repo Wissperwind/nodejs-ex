@@ -93,7 +93,7 @@ function userModule(){
 
 					} else {
 						console.log(error.code);
-						res.send(500, {error: "Could not get user friends."});
+						res.send(500, {error: "Could not get your friends"});
 					}
 				});
 

@@ -175,10 +175,10 @@ function photoModule(){
 						res.setHeader("Content-Disposition", "inline;filename=\"photo"+photo.id+"\"");
 						res.send(200, file);
 					} else
-						res.send(500, {error: "Server error. Can not get photo."})
+						res.send(500, {error: "Server error. Can not get photo"})
 				});
 			} else {
-				res.send(404, {error: "Photo does not exist."});
+				res.send(404, {error: "Photo does not exist"});
 			}
 		});
 		return next();
@@ -187,9 +187,9 @@ function photoModule(){
 	that.postPhotoVenue = function(req, res, next){
 		if(req.user && req.user.id){
 			if(!req.params.id){
-				res.send(400, {error: "No venue was specified for photo upload."});
+				res.send(400, {error: "No venue was specified for photo upload"});
 			} else if(req.headers["content-type"] != "image/jpeg" && req.headers["content-type"] != "image/png"){
-				res.send(400, {error: "Only JPEG and PNG images are allowed."});
+				res.send(400, {error: "Only JPEG and PNG images are allowed"});
 			} else {
 				that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
 					if(photoId){
@@ -197,15 +197,15 @@ function photoModule(){
 							if(str)
 								res.send(200, {error: "false"});
 							else
-								res.send(500, {error: "Could not add photo to venue."});
+								res.send(500, {error: "Could not add photo to venue"});
 						});
 					} else {
-						res.send(500, {error: "Could not save photo."});
+						res.send(500, {error: "Could not save photo"});
 					}
 				});
 			}
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};
@@ -213,7 +213,7 @@ function photoModule(){
 	that.postPhotoUser = function(req, res, next){
 		if(req.user && req.user.id){
 			if(req.headers["content-type"] != "image/jpeg" && req.headers["content-type"] != "image/png"){
-				res.send(400, {error: "Only JPEG and PNG images are allowed."});
+				res.send(400, {error: "Only JPEG and PNG images are allowed"});
 			} else {
 				that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
 					if(photoId){
@@ -221,15 +221,15 @@ function photoModule(){
 							if(str)
 								res.send(200, {error: "false"});
 							else
-								res.send(500, {error: "Could not add photo to user."});
+								res.send(500, {error: "Could not add photo to user"});
 						});
 					} else {
-						res.send(500, {error: "Could not save photo."});
+						res.send(500, {error: "Could not save photo"});
 					}
 				});
 			}
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};

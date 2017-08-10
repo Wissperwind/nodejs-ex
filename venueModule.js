@@ -412,7 +412,7 @@ function venueModule() {
 		function doSearch(lat, lng, radius){
 		
 			if(!(lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)){
-				res.send(400, {error: "We could not interpret your search location.", venues: []});
+				res.send(400, {error: "We could not interpret your search location", venues: []});
 				return next();
 			}
 			
@@ -423,7 +423,7 @@ function venueModule() {
 			} else if("category" in req.params){
 				options = {category: req.params.category};
 			} else {
-				res.send(400, {error: "Please enter a search term.", venues: []});
+				res.send(400, {error: "Please enter a search term", venues: []});
 				return next();
 			}
 			
@@ -438,18 +438,18 @@ function venueModule() {
 				if(venues != null) {
 					if(venues == "searching")
 						//res.send(202, {venues: [], status: "adding venues"});
-						res.send(202, {venues: [], error: "We are searching for venues."});
+						res.send(202, {venues: [], error: "We are searching for venues"});
 					else {
 						if(venues.length > 0)
 							//res.send(200, {venues: venues, status: "successful"});
 							res.send(200, {venues: venues, error: "false"});
 						else
 							//res.send(404, {venues: [], status: "no venues found"});
-							res.send(404, {venues: [], error: "No venues found."});
+							res.send(404, {venues: [], error: "No venues found"});
 					}
 				} else
 					//res.send(404, {venues: [], status: "adding venues"});	//
-					res.send(500, {venues: [], error: "There was an error."}); 
+					res.send(500, {venues: [], error: "There was an error"}); 
 			});
 			//else
 				//res.send(202, {status: "Updating database"});
@@ -477,14 +477,14 @@ function venueModule() {
 				} else {
 					console.log("Could not convert city to coordinates");
 					//res.send(500, "Could not convert city to coordinates");
-					res.send(500, {venues: [], error: "This place does not exist on earth."});
+					res.send(500, {venues: [], error: "This place does not exist on earth"});
 					return next();
 				}
 			});
 		} else {
 			console.log("Request without search location or radius received");
 			//res.send(400, "Please provide lat:... & lng:... or city:...")
-			res.send(400, {venues: [], error: "Please provide a location or your position and a search radius."});
+			res.send(400, {venues: [], error: "Please provide a location or your position and a search radius"});
 			return next();
 		}
 	};
@@ -500,7 +500,7 @@ function venueModule() {
 				res.send(200, venue);
 			}
 			else
-				res.send(404, {error: "Venue not found."});
+				res.send(404, {error: "Venue not found"});
 		});
 		return next();
 	};
@@ -594,52 +594,15 @@ function venueModule() {
 				}
 			});
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};
 	
-	/* that.rateVenue = function(req, res, next){
-		if(req.user && req.user.id){
-			that.findRating(req.params.id, req.user.id, function(rating){
-				if(!rating){
-					that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-						that.getAvgForVenue(req.params.id, function(avg){
-							that.updateVenueRating(req.params.id, avg, function(venue){
-								if(!venue){
-									res.send(404, {success: false});
-								} else {
-									res.send(200, {success: true});
-								}
-							});
-						});
-					});
-				} else {
-					that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-						that.getAvgForVenue(req.params.id, function(avg){
-							that.updateVenueRating(req.params.id, avg, function(venue){
-								if(!venue){
-									res.send(404, {success: false});
-								} else {
-									res.send(200, {success: true});
-								}
-							});
-						});
-					});
-				}
-			});
-		} else {
-			res.send(403, {success: false});
-		}
-		return next();
-	}; */
-	
-	
-	// TODO
 	that.checkIn = function(req, res, next){
 		if(req.user && req.user.id){
 			if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('rating')){
-				res.send(500, {error: "No venue or rating specified."});
+				res.send(500, {error: "No venue or rating specified"});
 			} else {
 				checkinModule.checkIn(req.body.id, req.user.id, function(foo){
 					if(foo){
@@ -649,7 +612,7 @@ function venueModule() {
 									that.getAvgForVenue(req.body.id, function(avg){
 										that.updateVenueRating(req.body.id, avg, function(venue){
 											if(!venue){
-												res.send(404, {error: "Venue does not exist."});
+												res.send(404, {error: "Venue does not exist"});
 											} else {
 												res.send(200, {error: "false"});
 											}
@@ -661,7 +624,7 @@ function venueModule() {
 									that.getAvgForVenue(req.body.id, function(avg){
 										that.updateVenueRating(req.body.id, avg, function(venue){
 											if(!venue){
-												res.send(404, {error: "Venue does not exist."});
+												res.send(404, {error: "Venue does not exist"});
 											} else {
 												res.send(200, {error: "false"});
 											}
@@ -676,85 +639,11 @@ function venueModule() {
 				});
 			}
 		} else {
-			res.send(403, {error: "You are not signed in."});
+			res.send(403, {error: "You are not signed in"});
 		}
 		return next();
 	};
-	/* that.checkIn = function(req, res, next){
-		if(req.user && req.user.id){
-			if()
-				that.findCheckIn(req.params.id, req.user.id, function(checkIn){
-					
-					if(checkIn){
-						that.updateCheckIn({venue: req.params.id, user: req.user.id, count: checkIn.count + 1}, function(checkin){
-							
-						});
-					}
-					
-					that.findRating(req.params.id, req.user.id, function(rating){
-						if(!rating){
-							that.insertRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-								that.getAvgForVenue(req.params.id, function(avg){
-									that.updateVenueRating(req.params.id, avg, function(venue){
-										if(!venue){
-											res.send(404, {success: false});
-										} else {
-											res.send(200, {success: true});
-										}
-									});
-								});
-							});
-						} else {
-							that.updateRating({venue: req.params.id, rating: req.params.rating, user: req.user.id}, function(rating){
-								that.getAvgForVenue(req.params.id, function(avg){
-									that.updateVenueRating(req.params.id, avg, function(venue){
-										if(!venue){
-											res.send(404, {success: false});
-										} else {
-											res.send(200, {success: true});
-										}
-									});
-								});
-							});
-						}
-					});
-				});
-		} else {
-			res.send(403, {success: false});
-		}
-		return next();
-	}; */
 	
-	
-	
-	// that.postVenue = function(req, res, next){
-		// if(!req.body.hasOwnProperty('place_id')){
-			// res.send(500, "Insufficient parameters, place_id required");
-		// } else {
-			// var venue = {
-				// id: req.body.place_id
-			// };
-			
-			// that.createVenue(venue, function(venue){
-				// console.log("Venue added: id: "+venue.id);
-				// res.send(201, venue);
-			// });
-		// }
-		// return next();
-	// };
-	
-/* 	that.testScanned = function(lat, lng){
-		var d = GoogleImport.SEARCH_RADIUS;
-		
-		database.connection.query(
-			"SELECT * FROM scanned_locations WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?",
-			[that.getLatLon(lat, lng, d, 180)[0], that.getLatLon(lat, lng, d, 0)[0], that.getLatLon(lat, lng, d, 270)[1], that.getLatLon(lat, lng, d, 90)[1]],
-			function(err, locations, fields){
-				console.log(locations);
-				console.log(that.checkSearches(49.83262612357941, 9.150138613404195, locations));
-			}
-		);
-	}; */
 }
 
 module.exports = new venueModule();
