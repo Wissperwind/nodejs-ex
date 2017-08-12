@@ -1,63 +1,29 @@
-function userModule(){
+function friendModule(){
 	var that = this;
 	var database = require('./database');
-	var cityModule = require('./cityModule');
-	var checkinModule = require('./checkinModule');
 	var commentModule = require('./commentModule');
-	var photoModule = require('./photoModule');
-	var encryptUtils = require('./encryptUtils');
-    //var nodemailer = require('nodemailer');
     var mail = require("nodemailer").mail;
 
-		that.postfriend = function (req, res, next){
-			if( !req.body.hasOwnProperty('userid') && !req.body.hasOwnProperty('commentid') ){
-					res.json({'error': 'Insufficient Parameters'});
-			} else {
-				if (req.body.hasOwnProperty('commentid')){
-					commentModule.findComment(req.body.commentid, function(comment){
-						if(comment.user == req.user.id){
-							res.send(400, {error: "You can't make friends with yourself"});
-							return next();
-						}
-						var post  = {
-							'user_a': req.user.id,
-							'user_b': comment.user
-						};
-						var query = database.connection.query('INSERT INTO user_friendship SET ?', post, function (error, results, fields) {
-							if (!error){
-								console.log('Last insert ', results);
-								response = {
-									"error": 'false'
-								};
-								res.send(response);
-							} else {
-								console.log(error);
-								console.log(error.code)
-								response = null;
-								if(error.code === 'ER_DUP_ENTRY')
-									response = {
-										"error": "You are already friends"
-									};
-								res.send(response);
-							}
-						});
-					});
-				} else{
-					if(req.body.userid == req.user.id){
-						res.send(400, {error: "You can't make friends with yourself"});
-						return next();
-					}
+	that.postfriend = function (req, res, next){
+		
+		function processFriend(user){
+			if(user == req.user.id){
+				res.send(400, {error: "You can't make friends with yourself"});
+				return next();
+			}
+			findFriends(req.user.id, function(friends){
+				if(friends && user in friends){
+					res.send(400, {error: "You are already friends"});
+					return next();
+				} else {
 					var post  = {
 						'user_a': req.user.id,
-						'user_b': req.body.userid
+						'user_b': user
 					};
 					var query = database.connection.query('INSERT INTO user_friendship SET ?', post, function (error, results, fields) {
 						if (!error){
 							console.log('Last insert ', results);
-							response = {
-								"error": 'false'
-							};
-							res.send(response);
+							res.send(200, {error: "false"});
 						} else {
 							console.log(error);
 							console.log(error.code)
@@ -66,55 +32,72 @@ function userModule(){
 								response = {
 									"error": "You are already friends"
 								};
-							res.send(response);
+							res.send(400, response);
 						}
 					});
 				}
+			});
+		}
+		
+		if( !req.body.hasOwnProperty('userid') && !req.body.hasOwnProperty('commentid') ){
+				res.json({'error': 'Insufficient Parameters'});
+		} else {
+			if (req.body.hasOwnProperty('commentid')){
+				commentModule.findComment(req.body.commentid, function(comment){
+					processFriend(comment.user);
+				});
+			} else{
+				processFriend(req.body.userid);
 			}
 		}
-    that.getUserfriend = function (req, res, next){
-				database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_b = id) WHERE user_a = ?', [req.user.id], function (error, rows, fields) {
-					if (!error){
-						//var friends = [];
-						var friends = {};
-						for(var i=0; i<rows.length; i++){
-							var friend = {
-								id: rows[i].id,
-								name: rows[i].username,
-								realname: rows[i].realName,
-								lat: rows[i].lastLat,
-								lng: rows[i].lastLong
-							}
-							//friends.push(friend);
-							friends[friend.id] = friend;
-						}
-						database.connection.query('SELECT * FROM user_friendship LEFT JOIN users ON (user_a = id) WHERE user_b = ?', [req.user.id], function (err, rows2, fields2) {
-							for(var i=0; i<rows2.length; i++){
-								var friend = {
-									id: rows2[i].id,
-									name: rows2[i].username,
-									realname: rows2[i].realName,
-									lat: rows2[i].lastLat,
-									lng: rows2[i].lastLong
-								}
-								//friends.push(friend);
-								friends[friend.id] = friend;
-							}
-							var friendslist = [];
-							for(var i in friends)
-								friendslist.push(friends[i]);
-							
-							res.send(200, {error: "false", friends: friendslist});
-						});
-
-							//res.json(results);
-
-
-					} else {
-						console.log(error.code);
-						res.send(500, {error: "Could not get your friends"});
+	}
+	
+	function findFriends(id, callback){
+		
+		database.connection.query("SELECT user_friendship.*,users_a.*,users_b.id AS id2,users_b.username AS username2,users_b.realName AS realName2,users_b.lastLat AS lastLat2,users_b.lastLong AS lastLong2 FROM user_friendship LEFT JOIN users AS users_a ON (user_a = users_a.id) LEFT JOIN users AS users_b ON (user_b = users_b.id) WHERE user_a=? OR user_b=?", [id, id], function(err, rows, fields){
+			if(!err){
+				var friends = {};
+				var friend = {};
+				for(var i=0; i<rows.length; i++){
+					if(rows[i].id == id){ // if user_a is the user and user_b is the friend
+						friend = {
+							id: rows[i].id2,
+							name: rows[i].username2,
+							realname: rows[i].realName2,
+							lat: rows[i].lastLat2,
+							lng: rows[i].lastLong2
+						};
+					} else { // if user_b is the user and user_a is the friend
+						friend = {
+							id: rows[i].id,
+							name: rows[i].username,
+							realname: rows[i].realName,
+							lat: rows[i].lastLat,
+							lng: rows[i].lastLong
+						};
 					}
-				});
+					friends[friend.id] = friend;
+				}
+				callback(friends);
+			} else {
+				console.log(err.code);
+				callback(null);
+			}
+		});
+	}
+	
+    that.getUserfriend = function (req, res, next){
+		
+		findFriends(req.user.id, function(friends){
+			if(friends){
+				var friendslist = [];
+				for(var i in friends)
+					friendslist.push(friends[i]);
+				res.send(200, {error: "false", friends: friendslist});
+			} else {
+				res.send(500, {error: "Could not get your friends"});
+			}
+		});
 
         return next();
     }
@@ -126,18 +109,17 @@ function userModule(){
 			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-        var query = 'DELETE FROM user_friendship WHERE user_a = ? and user_b =?';//console.log('in delete')
-        database.connection.query(query, [req.user.id,friendid], function (error, results, fields) {
+        var query = 'DELETE FROM user_friendship WHERE (user_a=? and user_b=?) or (user_b=? and user_a=?)';//console.log('in delete')
+        database.connection.query(query, [req.user.id,friendid,friendid,req.user.id], function (error, results, fields) {
             if (!error){
                 console.log(results.affectedRows + " record deleted");
-                //req.session.destroy();
                 res.json({
                     "error": 'false'
                 });
             } else {
                 console.log(error.code);
                 res.json({
-                    "error": "Friend could not be unfriended"//error.code
+                    "error": "Friend could not be unfriended"
                 });
             }
         });
@@ -146,4 +128,4 @@ function userModule(){
     }
 }
 
-module.exports = new userModule();
+module.exports = new friendModule();
