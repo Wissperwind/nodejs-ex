@@ -197,30 +197,23 @@ function friendModule(){
                             friendIDs.push(results[i].user_a)
                         }
                     }
-
-                    var queryParams;
-                    if(req.params.name.length < 3){
-                        queryParams = [friendIDs.join(), req.params.name+'%', req.params.name+'%', req.params.name];
-                    } else {
-                        queryParams = [friendIDs.join(), '%'+req.params.name+'%', '%'+req.params.name+'%', req.params.name];
-                    }
-                    var query = 'SELECT * FROM users WHERE ( acos(sin(users.lastLat * 0.0175) * sin(? * 0.0175) + cos(users.lastLat * 0.0175) * cos(YOUR_LATITUDE_X * 0.0175) * cos((YOUR_LONGITUDE_Y * 0.0175) - (users.lastLong * 0.0175)) ) * 3959 <= YOUR_RADIUS_INMILES )'
-                    database.connection.query('SELECT * FROM users WHERE id NOT IN (?) AND (username LIKE ? OR realName LIKE ? OR eMail = ?)', [req.params.lat, ], function (error, rows, fields) {
+                    var query = 'SELECT * FROM users WHERE ( acos(sin(users.lastLat * 0.0175) * sin(? * 0.0175) + cos(users.lastLat * 0.0175) * cos(? * 0.0175) * cos((? * 0.0175) - (users.lastLong * 0.0175)) ) * 6371*1000 <= ? )';
+                    database.connection.query( query, [req.params.lat, req.params.lat, req.params.lng, req.params.radius], function (error, rows, fields) {
                         if (!error){
                             var friendsObj=[];
                             for(var j = 0; j < rows.length; j++){
-                                friendsObj[j] = {
-                                    'id': rows[j].id,
-                                    'name': rows[j].username,
-                                    'realname': rows[j].realName
-                                }
+                                if(!friendIDs.includes(rows[j].id))
+                                    friendsObj.push({
+                                        'id': rows[j].id,
+                                        'name': rows[j].username,
+                                        'realname': rows[j].realName
+                                    });
                             }
 
                             res.json({
                                 'error': false,
                                 'friends': friendsObj
                             });
-
 
                         } else {
                             console.log(error.code);
