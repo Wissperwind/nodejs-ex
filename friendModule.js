@@ -109,7 +109,7 @@ function friendModule(){
 			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-        var query = 'DELETE FROM user_friendship WHERE (user_a=? and user_b=?) or (user_b=? and user_a=?)';//console.log('in delete')
+        var query = 'DELETE FROM user_friendship WHERE (user_a=? and user_b=?) or (user_a=? and user_b=?)';//console.log('in delete')
         database.connection.query(query, [req.user.id,friendid,friendid,req.user.id], function (error, results, fields) {
             if (!error){
                 console.log(results.affectedRows + " record deleted");
