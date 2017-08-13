@@ -39,6 +39,13 @@ server.post({url:'/login'}, authModule.logIn);
 //use authModule.ensureAuthenticated() for each request requiring authentication
 // in order to return the error when user is not authenticated
 server.get({url:'/hello'}, authModule.ensureAuthenticated, authModule.helloRoute);
+server.get({url:'/logout'}, authModule.ensureAuthenticated, function (req, res, next) {
+    req.session.destroy();
+    res.json({
+        "error": 'false'
+    });
+    return next();
+});
 
 server.get({url:'/account'}, authModule.ensureAuthenticated, userModule.getUserInfo);
 server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
@@ -47,6 +54,8 @@ server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUs
 server.put({url:'/friends'},authModule.ensureAuthenticated, friendModule.postfriend);
 server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUserfriend);
 server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
+server.get('/profilesearch',authModule.ensureAuthenticated, friendModule.profileSearch);
+server.get('/profilesearchbylocation/:lat/:lng/:radius',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
 
 
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
@@ -56,10 +65,10 @@ server.get({url:'/friendprofile'},authModule.ensureAuthenticated, chat.getUserIn
 
 server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
 
-server.get({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.getPasswordResetToken); //For logged out users
-server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged out users
-server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged in users
-server.put({url:'/pw'}, userModule.updatePassword); //For logged in users
+server.get({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.getPasswordResetToken); //For logged in users
+server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged in users
+server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged out users
+server.put({url:'/pw'}, userModule.updatePassword); //For logged out users
 
 server.get({url:'/highscorelist'}, highscoreModule.getList);
 
