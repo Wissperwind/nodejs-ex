@@ -26,11 +26,27 @@ function userModule(){
             } else {
                 console.log(error.code)
                 response = null;
-                if(error.code === 'ER_DUP_ENTRY')
-                    response = {
-                        "error": "User already exists"
-                    };
-                callback(response);
+                if(error.code === 'ER_DUP_ENTRY'){
+                    database.connection.query('SELECT * FROM users WHERE eMail = ?', [post.eMail], function (error, results, fields) {
+                        if(!error){
+                            if(results.length === 1){
+                                response = {
+                                    "error": "Email already exists"
+                                };
+                                callback(response);
+                            } else {
+                                response = {
+                                    "error": "Username already exists"
+                                };
+                                callback(response);
+                            }
+                        } else {
+                            console.log(error.code);
+                            res.send(500, {error: "Could not get user info"});
+                        }
+                    });
+                }
+
             }
         });
     }
