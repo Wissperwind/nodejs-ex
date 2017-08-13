@@ -141,22 +141,24 @@ function friendModule(){
                             friendIDs.push(results[i].user_a)
                         }
                     }
+                    console.log(friendIDs.join())
 
                     var queryParams;
                     if(req.params.name.length < 3){
-                        queryParams = [friendIDs.join(), req.params.name+'%', req.params.name+'%', req.params.name];
+                        queryParams = [req.params.name+'%', req.params.name+'%', req.params.name];
                     } else {
-                        queryParams = [friendIDs.join(), '%'+req.params.name+'%', '%'+req.params.name+'%', req.params.name];
+                        queryParams = ['%'+req.params.name+'%', '%'+req.params.name+'%', req.params.name];
                     }
-                    database.connection.query('SELECT * FROM users WHERE id NOT IN (?) AND (username LIKE ? OR realName LIKE ? OR eMail = ?)', queryParams, function (error, rows, fields) {
+                    database.connection.query('SELECT * FROM users WHERE username LIKE ? OR realName LIKE ? OR eMail = ?', queryParams, function (error, rows, fields) {
                         if (!error){
                             var friendsObj=[];
                             for(var j = 0; j < rows.length; j++){
-                                friendsObj[j] = {
+                                if(!friendIDs.includes(rows[j].id))
+                                friendsObj.push({
                                     'id': rows[j].id,
                                     'name': rows[j].username,
                                     'realname': rows[j].realName
-                                }
+                                });
                             }
 
                             res.json({
@@ -184,7 +186,6 @@ function friendModule(){
     }
 
     that.profileSearchByLocation = function (req, res, next){
-        console.log(req.params.name.length)
         if( req.params.lat && req.params.lng && req.params.radius ){
             database.connection.query('SELECT * FROM user_friendship WHERE user_a = ? OR user_b = ?', [req.user.id, req.user.id], function (err, results, fields2) {
                 if (!err){
@@ -203,7 +204,8 @@ function friendModule(){
                     } else {
                         queryParams = [friendIDs.join(), '%'+req.params.name+'%', '%'+req.params.name+'%', req.params.name];
                     }
-                    database.connection.query('SELECT * FROM users WHERE id NOT IN (?) AND (username LIKE ? OR realName LIKE ? OR eMail = ?)', queryParams, function (error, rows, fields) {
+                    var query = 'SELECT * FROM users WHERE ( acos(sin(users.lastLat * 0.0175) * sin(? * 0.0175) + cos(users.lastLat * 0.0175) * cos(YOUR_LATITUDE_X * 0.0175) * cos((YOUR_LONGITUDE_Y * 0.0175) - (users.lastLong * 0.0175)) ) * 3959 <= YOUR_RADIUS_INMILES )'
+                    database.connection.query('SELECT * FROM users WHERE id NOT IN (?) AND (username LIKE ? OR realName LIKE ? OR eMail = ?)', [req.params.lat, ], function (error, rows, fields) {
                         if (!error){
                             var friendsObj=[];
                             for(var j = 0; j < rows.length; j++){
@@ -233,7 +235,7 @@ function friendModule(){
             });
 
         } else {
-            res.json({'error': 'no name'});
+            res.json({'error': 'Insufficient parameters'});
         }
 
         return next();
