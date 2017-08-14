@@ -121,9 +121,14 @@ function userModule(){
 						'message': "New message from ".receiveUsername
 				};
 				
-				var query = database.connection.query('INSERT INTO notification SET ?', post, function (error, results, fields) {
+				var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {
 						if (!error){
 								console.log('notification inserted');
+						} else {
+							console.log('error while inserting the notification');
+							console.log(error);
+							console.log(error.code)
+								
 						}
 				});
 			
