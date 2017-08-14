@@ -93,8 +93,8 @@ function userModule(){
 						for(var i=0; i<results.length; i++){
 							sendUername = results[i].username
 							};
-						}
 					}
+					
 				});
 				
 				
@@ -110,7 +110,6 @@ function userModule(){
 						for(var i=0; i<results.length; i++){
 							receiveUsername = results[i].username
 							};
-						}
 					}
 				});
 				
