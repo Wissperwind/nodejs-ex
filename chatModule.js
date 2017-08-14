@@ -103,15 +103,14 @@ function userModule(){
 							"lng": results[0].lastLong,
 							"error": "false"
 						}
-						res.send(200, response);
-						// if( results[0].city === null ){
-							// res.json(response);
-						// } else {
-							// database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
-								// response.city = city_results[0].name;
-								// res.json(response);
-							// });
-						// }
+						if( results[0].city === null ){
+							res.send(200, response);
+						} else {
+							database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
+								response.city = city_results[0].name;
+								res.send(200, response);
+							});
+						}
 
 					} else {
 						console.log(error.code);
