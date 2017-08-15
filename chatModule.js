@@ -87,7 +87,7 @@ function chatModule(){
 		var sendUername;
 		
 		database.connection.query('SELECT username FROM users WHERE id = ?',
-		 [req.user.id], function (error, results, fields) {
+		 [req.body.friendid], function (error, results, fields) {
 			if (!error){
 				
 				for(var i=0; i<results.length; i++){
@@ -103,7 +103,7 @@ function chatModule(){
 			var receiveUsername;
 			
 			database.connection.query('SELECT username FROM users WHERE id = ?',
-			 [req.body.friendid], function (error, results, fields) {
+			 [req.user.id], function (error, results, fields) {
 				if (!error){
 					
 					for(var i=0; i<results.length; i++){
