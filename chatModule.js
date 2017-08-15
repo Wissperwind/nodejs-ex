@@ -114,7 +114,7 @@ function chatModule(){
 				//insert the notification
 				post  = {
 						'username': sendUername,
-						'message': "New message from ".receiveUsername
+						'message': "New message from " + receiveUsername
 				};
 				
 				var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {
