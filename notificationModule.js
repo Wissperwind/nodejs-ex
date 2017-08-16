@@ -5,15 +5,13 @@ function notificationModule() {
 
 
 
-	that.loadNotifications = function(callback){
-		
-		
+	that.loadNotifications = function(req, callback){
 		
 		
 		query = "SELECT message FROM notifications WHERE username = ?";
 			database.connection.query(
 			query,
-			[req.body.username],function(err, rows, field){
+			[req.params.username],function(err, rows, field){
 				if(!err){
 					var completeList = [];
 					var listEntry;
@@ -41,11 +39,11 @@ function notificationModule() {
 	
 	that.getNotifications = function(req, res, next){
 	
-		if(!req.body.hasOwnProperty('username')){
+		if(!req.params.username){
 				res.json({'error': 'Insufficient Parameters'});
 			} else {
 		
-				that.loadNotifications(function(completeList){
+				that.loadNotifications(req, function(completeList){
 					
 					if(completeList != null) {
 							
