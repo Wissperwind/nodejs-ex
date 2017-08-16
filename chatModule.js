@@ -84,14 +84,14 @@ function chatModule(){
 		
 		//get the username of the user
 		
-		var sendUername;
+		var sendUsername;
 		
 		database.connection.query('SELECT username FROM users WHERE id = ?',
 		 [req.user.id], function (error, results, fields) {
 			if (!error){
 				
 				for(var i=0; i<results.length; i++){
-					sendUername = results[i].username
+					sendUsername = results[i].username
 					};
 			}
 			
@@ -114,7 +114,7 @@ function chatModule(){
 				//insert the notification
 				post  = {
 						'username': receiveUsername,
-						'message': "New message from " + sendUername
+						'message': "New message from " + sendUsername
 				};
 				
 				var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {

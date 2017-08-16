@@ -24,6 +24,68 @@ function friendModule(){
 						if (!error){
 							console.log('Last insert ', results);
 							res.send(200, {error: "false"});
+							
+							
+							
+							//Add a notification to the notification table
+		
+							//get the username of the user
+							
+							var sendUsername;
+							
+							database.connection.query('SELECT username FROM users WHERE id = ?',
+							 [req.user.id], function (error, results, fields) {
+								if (!error){
+									
+									for(var i=0; i<results.length; i++){
+										sendUsername = results[i].username
+										};
+								}
+								
+								
+								
+								
+								//get the username of the friend
+							
+								var receiveUsername;
+								
+								database.connection.query('SELECT username FROM users WHERE id = ?',
+								 [user], function (error, results, fields) {
+									if (!error){
+										
+										for(var i=0; i<results.length; i++){
+											receiveUsername = results[i].username
+											};
+									}
+								
+									//insert the notification
+									post  = {
+											'username': receiveUsername,
+											'message':  sendUsername + "started afriendship with you" 
+									};
+									
+									var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {
+											if (!error){
+													console.log('notification inserted');
+											} else {
+												console.log('error while inserting the notification');
+												console.log(error);
+												console.log(error.code)
+													
+											}
+									});
+								
+								});
+								
+							
+								
+							});
+							
+							
+							
+							
+							
+							
 						} else {
 							console.log(error);
 							console.log(error.code)
