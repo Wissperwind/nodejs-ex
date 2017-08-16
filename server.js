@@ -8,6 +8,7 @@ var commentModule = require('./commentModule');
 var photoModule = require('./photoModule');
 var chat = require('./chatModule');
 var highscoreModule = require('./highscoreModule');
+var notificationModule = require('./notificationModule');
 
 const port = 8080;
 
@@ -71,6 +72,7 @@ server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged out user
 server.put({url:'/pw'}, userModule.updatePassword); //For logged out users
 
 server.get({url:'/highscorelist'}, highscoreModule.getList);
+server.get({url:'/notification'}, notificationModule.getNotifications);
 
 server.get('venues',		venueModule.getVenues);
 server.get('venues/:id',	venueModule.getVenue);
