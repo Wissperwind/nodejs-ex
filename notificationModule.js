@@ -26,25 +26,25 @@ function notificationModule() {
 					}
 					console.log(completeList);
 					callback(completeList);
+					
+					//remove the notifications once they are collected by the phone
+				
+					query = "DELETE FROM notifications WHERE username = ?";
+					database.connection.query(
+					query,
+					[req.params.username],function(err, rows, field){
+						if (error){
+							console.log(error);
+							console.log(error.code)
+						}
+							
+					});
+					
 					return;
 				} else {
 					console.log("Error querying DB for notifications");
 				}
 				
-				
-				
-				//remove the notifications once they are collected by the phone
-				
-				query = "DELETE FROM notifications WHERE username = ?";
-				database.connection.query(
-				query,
-				[req.params.username],function(err, rows, field){
-					if (error){
-						console.log(error);
-						console.log(error.code)
-					}
-						
-				});
 				
 				callback(null);
 			});
