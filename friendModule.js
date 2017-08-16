@@ -61,7 +61,7 @@ function friendModule(){
 									//insert the notification
 									post  = {
 											'username': receiveUsername,
-											'message':  sendUsername + "started afriendship with you" 
+											'message':  sendUsername + " started a friendship with you" 
 									};
 									
 									var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {
