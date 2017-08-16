@@ -33,7 +33,7 @@ function notificationModule() {
 					database.connection.query(
 					query,
 					[req.params.username],function(err, rows, field){
-						if (error){
+						if (err){
 							console.log(error);
 							console.log(error.code)
 						}
