@@ -55,6 +55,7 @@ server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUs
 server.put({url:'/friends'},authModule.ensureAuthenticated, friendModule.postfriend);
 server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUserfriend);
 server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
+server.get({url:'/friendprofile'},authModule.ensureAuthenticated, friendModule.getFriendInfo);
 server.get('/profilesearch',authModule.ensureAuthenticated, friendModule.profileSearch);
 server.get('/profilesearchlocation',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
 
@@ -62,7 +63,6 @@ server.get('/profilesearchlocation',authModule.ensureAuthenticated, friendModule
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
 //server.get({url:'/chat/:friendid'},authModule.ensureAuthenticated, chat.getchat);
 server.get({url:'/chat'},authModule.ensureAuthenticated, chat.getchat);
-server.get({url:'/friendprofile'},authModule.ensureAuthenticated, chat.getUserInfo);
 
 server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
 
