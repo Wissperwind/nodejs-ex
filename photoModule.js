@@ -7,14 +7,10 @@ function photoModule(){
 	that.fs = fs;
 	var database = require('./database');
 	
-	//that.photoDir = process.env.OPENSHIFT_DATA_DIR; //does not work...
-	that.photoDir = "../../../teamuniformdata";//+process.env.PWD;
-	//that.photoDir = "photos"
+	that.photoDir = "../../../teamuniformdata";
 	that.photoFilePath = that.photoDir + "/photo";
-	//that.photoDir = "../testfolder"
 	
 	that.serverAddress =  "http://teamuniform-teamuniform.7e14.starter-us-west-2.openshiftapps.com";
-	//that.serverAddress =  "localhost:8080";
 	
 	console.log("Photos are in %s, this folder exists: "+fs.existsSync(that.photoDir), that.photoDir);
 	
@@ -32,7 +28,7 @@ function photoModule(){
 						var photo = {
 							id: rows[i].id,
 							format: rows[i].format,
-							path: rows[i].path + rows[i].id + rows[i].format //".jpg"
+							path: rows[i].path + rows[i].id + rows[i].format
 						}
 						callback(photo);
 						return;
@@ -99,10 +95,8 @@ function photoModule(){
 			if(!err){
 				var photo = {
 					id: result.insertId,
-					path: that.photoFilePath + result.insertId + format //".jpg"
+					path: that.photoFilePath + result.insertId + format
 				};
-				//photo.id = result.insertId;
-				//photo.path = that.photoFilePath + photo.id + ".jpg";
 				console.log("Inserted photo path into DB: "+photo.path);
 				callback(photo);
 			} else {
@@ -157,14 +151,6 @@ function photoModule(){
 			}
 		});
 	};
-	
-/* 	that.downloadPhoto = function(requestObject, callback){
-		that.addPhotoPathId(function (photo){
-			requestObject.pipe(fs.createWriteStream(photo.path)).on('close', function(){
-				callback(photo.id);
-			});
-		});
-	}; */
 	
 	that.getPhoto = function(req, res, next){
 		that.findPhotoPathId(req.params.id, function(photo){

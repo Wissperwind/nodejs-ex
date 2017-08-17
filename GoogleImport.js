@@ -3,8 +3,7 @@ function GoogleImporter(){
 	var that = this;
 	
 	const GOOGLE_KEY = "AIzaSyC-hkv1dS7t-jXthfGmCOIjwyvPnUCLvDE"; //Should go into the environment variables for secrecy
-	that.SEARCH_RADIUS = 2000; // meters; what's a good value? Max 200 venues are returned per search request
-	//that.SEARCH_RADIUS = 500; //for testing
+	that.SEARCH_RADIUS = 2000; // meters
 	
 	const request = require('request');
 	var photoModule = require('./photoModule');
@@ -64,18 +63,6 @@ function GoogleImporter(){
 		request(optionsHead, function(err, res, body){
 			if(!err && res.statusCode == 200){
 				if(res.headers["content-type"] == "image/jpeg" || res.headers["content-type"] == "image/png"){
-					/* photoModule.savePhoto(body, function(photoId){
-						if(photoId){
-							photoModule.addPhotoToVenue(id, photoId, null, function(str){
-								if(str)
-									callback("OK");
-								else
-									callback(null);
-							});
-						} else {
-							callback(null);
-						}
-					}); */
 					photoModule.addPhotoPathId(res.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function (photo){
 						request(options).pipe(photoModule.fs.createWriteStream(photo.path)).on('close', function(){
 							photoModule.addPhotoToVenue(id, photo.id, null, function(str){
@@ -86,16 +73,6 @@ function GoogleImporter(){
 							});
 						});
 					});
-							
-							
-					/* photoModule.downloadPhoto(request(options), function(photoId){
-						photoModule.addPhotoToVenue(id, photoId, null, function(str){
-							if(str)
-								callback("OK");
-							else
-								callback(null);
-						});
-					}); */
 				} else {
 					console.log("File type not supported: " + res.headers["content-type"]);
 					callback(null);
@@ -123,7 +100,6 @@ function GoogleImporter(){
 			if(!err && res.statusCode == 200){
 				var details = JSON.parse(body);
 				if(details.status == "OK"){
-					//console.log(details.result);
 					callback(details.result);
 				} else {
 					console.log(details.status);
