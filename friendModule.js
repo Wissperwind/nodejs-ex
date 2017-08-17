@@ -2,7 +2,8 @@ function friendModule(){
 	var that = this;
 	var database = require('./database');
 	var commentModule = require('./commentModule');
-    var mail = require("nodemailer").mail;
+	var checkinModule = require('./checkinModule');
+	var photoModule = require('./photoModule');
 
 	that.postfriend = function (req, res, next){
 
@@ -25,8 +26,6 @@ function friendModule(){
 							console.log('Last insert ', results);
 							res.send(200, {error: "false"});
 							
-							
-							
 							//Add a notification to the notification table
 		
 							//get the username of the user
@@ -41,9 +40,6 @@ function friendModule(){
 										sendUsername = results[i].username
 										};
 								}
-								
-								
-								
 								
 								//get the username of the friend
 							
@@ -65,27 +61,16 @@ function friendModule(){
 									};
 									
 									var query = database.connection.query('INSERT INTO notifications SET ?', post, function (error, results, fields) {
-											if (!error){
-													console.log('notification inserted');
-											} else {
-												console.log('error while inserting the notification');
-												console.log(error);
-												console.log(error.code)
-													
-											}
+										if (!error){
+												console.log('notification inserted');
+										} else {
+											console.log('error while inserting the notification');
+											console.log(error);
+											console.log(error.code)
+										}
 									});
-								
 								});
-								
-							
-								
 							});
-							
-							
-							
-							
-							
-							
 						} else {
 							console.log(error);
 							console.log(error.code)
@@ -163,6 +148,48 @@ function friendModule(){
 
         return next();
     }
+	
+	
+	that.getFriendInfo = function (req, res, next){
+		if( !req.params.hasOwnProperty('userid') ){
+				res.json({'error': 'Insufficient Parameters'});
+		} else {
+			checkinModule.findCheckinsByUser(req.params.userid, function(checkins){
+				photoModule.findPhotoOfUser(req.params.userid, function(photoUrl){
+					database.connection.query('SELECT * FROM users WHERE id = ?', [req.params.userid], function (error, results, fields) {
+						if (!error){
+							var response = {
+								"id": req.params.userid,
+								"name" : results[0].username,
+								"realname": results[0].realName,
+								"email": results[0].eMail,
+								"age": results[0].age,
+								"city": results[0].city  ? results[0].city : "",
+								"rank": checkins[0].count ? checkins[0].count : 0,
+								"url": photoUrl,
+								"lat": results[0].lastLat,
+								"lng": results[0].lastLong,
+								"error": "false"
+							}
+							if( results[0].city === null ){
+								res.send(200, response);
+							} else {
+								database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
+									response.city = city_results[0].name;
+									res.send(200, response);
+								});
+							}
+
+						} else {
+							console.log(error.code);
+							res.send(500, {error: "Could not get user info"});
+						}
+					});
+				});
+			});
+		}
+		return next();
+	}
 
 
 
