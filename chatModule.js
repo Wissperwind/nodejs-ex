@@ -27,7 +27,7 @@ function chatModule(){
 						};
 						messages.push(message);
 					}
-					res.send(200, {error[1]: "false", chat: messages});
+					res.send(200, {error: "false", chat: messages});
 
 				} else {
 					console.log(error[1].code);
