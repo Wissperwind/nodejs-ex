@@ -9,7 +9,7 @@ function chatModule(){
 		} else {
 			database.connection.query(	'DELETE FROM notifications WHERE username IN (SELECT username FROM users WHERE id = 20) AND CONCAT("New message from ", (SELECT username FROM users WHERE id = 1)) = message;'+
 										'SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
-			 [req.user.id, friendid,req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
+			 [req.user.id, friendid, req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
 				if (!error){
 					var messages = [];
 					for(var i=0; i<results.length; i++){
