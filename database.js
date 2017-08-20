@@ -8,10 +8,10 @@ function dbConnection() {
 			'host' 		: 'sql11.freemysqlhosting.net',
 			'user'		: 'sql11175021',
 			'password'	: 'fXIz3dRIpx',
-			'database'	: 'sql11175021'		
+			'database'	: 'sql11175021',
+			multipleStatements: true			
 		});	
 		
-	that.connection = mysql.createConnection({multipleStatements: true});
 
 // for local testing
 /* 	that.connection = mysql.createConnection({
