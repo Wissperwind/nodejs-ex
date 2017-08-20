@@ -10,7 +10,7 @@ function chatModule(){
 			database.connection.query(	'DELETE FROM notifications WHERE username IN (SELECT username FROM users WHERE id = ?) AND CONCAT("New message from ", (SELECT username FROM users WHERE id = ?)) = message;'+
 										'SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
 			 [req.user.id, friendid, req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
-				if (!error[1]){
+				if (!error){
 					var messages = [];
 					for(var i=0; i<results[1].length; i++){
 						// var date = new Date(results[1][i].date*1000);
@@ -30,8 +30,8 @@ function chatModule(){
 					res.send(200, {error: "false", chat: messages});
 
 				} else {
-					console.log(error[1].code);
-					console.log(error[1]);
+					console.log(error.code);
+					console.log(error);
 					res.send(500, {error: "Could not find the chat with your friend"});
 				}
 			});
