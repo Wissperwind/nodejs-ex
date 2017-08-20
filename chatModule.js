@@ -31,6 +31,7 @@ function chatModule(){
 
 				} else {
 					console.log(error.code);
+					console.log(error);
 					res.send(500, {error: "Could not find the chat with your friend"});
 				}
 			});

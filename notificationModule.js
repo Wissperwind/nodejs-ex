@@ -34,8 +34,8 @@ function notificationModule() {
 					query,
 					[req.params.username],function(err, rows, field){
 						if (err){
-							console.log(error);
-							console.log(error.code)
+							console.log(err);
+							console.log(err.code)
 						}
 							
 					});
