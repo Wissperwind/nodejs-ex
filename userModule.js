@@ -51,9 +51,16 @@ function userModule(){
         });
     }
     that.signUp = function (req, res, next){
-        if( !req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')){
-            res.json({'error': 'Insufficient Parameters'});
+        if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) ) || ( req.params.username == '' || req.params.email == '' || req.params.password == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
+            res.send(400, {error: 'Insufficient Parameters'});
         } else {
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'username': req.params.username,
+                    'email': req.params.email,
+                    'password': req.params.password
+                }
+            }
             user = {
                 username: req.body.username,
                 email: req.body.email,
@@ -82,11 +89,11 @@ function userModule(){
 							"error": "false"
 						}
 						if( results[0].city === null ){
-							res.json(response);
+							res.send(200, response);
 						} else {
 							database.connection.query('SELECT name FROM cities WHERE id = ?', results[0].city, function (city_error, city_results, city_fields) {
 								response.city = city_results[0].name;
-								res.json(response);
+								res.send(200, response);
 							});
 						}
 
@@ -100,20 +107,29 @@ function userModule(){
         return next();
     }
     that.updateUserInfo = function (req, res, next){
-        if( !req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('realname') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('age') || !req.body.hasOwnProperty('city') ){
-            res.json({'error': 'Insufficient Parameters'});
+        if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('realname') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('age') || !req.body.hasOwnProperty('city') )) || (req.params.username == '' ||req.params.realname == '' ||req.params.email == '' ||req.params.age == '' ||req.params.city == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 ) ){
+            res.send(400, {'error': 'Insufficient Parameters'});
         } else {
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'username': req.params.username,
+                    'realname': req.params.realname,
+                    'email': req.params.email,
+                    'age': req.params.age,
+                    'city': req.params.city
+                }
+            }
             cityModule.getCityID(req.body.city, function (cityID) {
                 var query = 'UPDATE users SET username = ?, realName = ?, eMail = ?, age = ?, city = ? WHERE id = ?';
                 database.connection.query(query, [req.body.username, req.body.realname, req.body.email, req.body.age, cityID, req.user.id], function (error, results, fields) {
                     if (!error){
                         console.log(results.affectedRows + " record updated")
-                        res.json({
+                        res.send(200, {
                             "error": 'false'
                         });
                     } else {
                         console.log(error.code);
-                        res.json({
+                        res.send(500, {
                             "error": error.code
                         });
                     }
@@ -128,12 +144,12 @@ function userModule(){
             if (!error){
                 console.log(results.affectedRows + " record deleted");
                 req.session.destroy();
-                res.json({
+                res.send(200, {
                     "error": 'false'
                 });
             } else {
                 console.log(error.code);
-                res.json({
+                res.send(500, {
                     "error": error.code
                 });
             }
@@ -145,19 +161,19 @@ function userModule(){
         var userid;
         //if logged out user; requires username parameter
         if(!req.user || !req.user.id){
-            console.log(req.method)
-            if( typeof req.params.username === 'undefined' && !req.body.hasOwnProperty('username') ){
-                res.json({'error': 'Insufficient or incorrect parameters'});
+
+            if( ( typeof req.body == 'object' && !req.body.hasOwnProperty('username') ) || req.params.username == ''  || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 ) ){
+                res.send(400, {'error': 'Insufficient Parameters'});
             } else {
-                if( req.method === 'GET' ){
-                    username = req.params.username;
-                } else {
-                    username = req.body.username;
+                if(typeof req.body !== 'object'){
+                    req.body = {
+                        'username': req.params.username
+                    }
                 }
-                database.connection.query('SELECT id FROM users WHERE username = ?', [username], function (error, results, fields) {
+                database.connection.query('SELECT id FROM users WHERE username = ?', [req.body.username], function (error, results, fields) {
                     if (!error){
                         if(results.length === 0){
-                            res.json({
+                            res.send(400, {
                                 error: "Incorrect username!"
                             });
                         } else {
@@ -170,6 +186,7 @@ function userModule(){
                     }
                 });
             }
+
         } else {
             //if logged in, use userid from session
             userid = req.user.id;
@@ -194,7 +211,7 @@ function userModule(){
                                 subject: "Your account password",
                                 html: "<p>Dear "+results[0].realName+",</p><p>There was recently a request to reset the password for your account.</p><p>Please enter the following password reset token in the app to continue resetting your account password: <strong>"+pwResetToken+"</strong></p><div style='margin: 30px 0; border-bottom: 1px solid #d2d2d2;'></div><p>This e-mail message has been delivered from a send-only address. Please do not reply to this message.</p>"
                             });
-                            res.json({
+                            res.send(200, {
                                 "error": 'false'
                             });
                         } else {
@@ -204,7 +221,7 @@ function userModule(){
                     });
                 } else {
                     console.log('Could not add password reset token!'+error.code)
-                    res.json({
+                    res.send(500, {
                         "error": 'Could not add password reset token!'
                     });
                 }
@@ -216,16 +233,26 @@ function userModule(){
         });
     }
     that.updatePassword = function (req, res, next){
-        getUserID(req, res, function (result) {
-            var userid = result;
-            if( !req.body.hasOwnProperty('newpassword') || !req.body.hasOwnProperty('safetystring') ){
-                res.json({'error': 'Insufficient Parameters'});
-            } else {
+
+        if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('newpassword') || !req.body.hasOwnProperty('safetystring') ) ) || ( req.params.newpassword == '' || req.params.safetystring == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
+            res.send(400, {'error': 'Insufficient Parameters'});
+        } else {
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'newpassword': req.params.newpassword,
+                    'safetystring': req.params.safetystring
+                }
+                if(typeof req.params.username !== 'undefined'){
+                    req.body.username = req.params.username;
+                }
+            }
+            getUserID(req, res, function (result) {
+                var userid = result;
                 var query = 'SELECT pwResetToken FROM users WHERE id = ?';
                 database.connection.query(query, [userid], function (error, results, fields) {
                     if (!error){
                         if(results[0].pwResetToken === ''){
-                            res.json({
+                            res.send(400, {
                                 error: 'Password reset token does not exist!'
                             });
                         } else if(results[0].pwResetToken === req.body.safetystring){
@@ -235,31 +262,33 @@ function userModule(){
                             database.connection.query(query, ['', hashResult.hash, hashResult.salt, userid], function (error, results, fields) {
                                 if (!error){
                                     console.log("password updated")
-                                    res.json({
+                                    res.send(200, {
                                         "error": 'false'
                                     });
                                 } else {
                                     console.log('Password not updated! Error code: '+error.code);
-                                    res.json({
+                                    res.send(500, {
                                         "error": 'Password not updated! Error code: '+error.code
                                     });
                                 }
                             });
                         } else {
-                            res.json({
+                            res.send(400, {
                                 error: 'Incorrect password reset token!'
                             });
                         }
                     } else {
                         console.log('Password reset token retrieval error!: '+error.code)
-                        res.json({
+                        res.send(500, {
                             "error": 'Password reset token retrieval error!'
                         });
                     }
                 });
-            }
-            return next();
-        });
+                return next();
+            });
+
+        }
+
     }
 
 
@@ -296,20 +325,22 @@ function userModule(){
     }
 
     that.putPosition = function(req, res, next){
-        if(req.user && req.user.id){
-            if(!req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng')){
-                res.send(400, {error: "No lat and/or lng specified."});
-            } else {
-                that.updateLastPos(req.user.id, req.body.lat, req.body.lng, function(id){
-                    if(id){
-                        res.send(200, {error: "false"});
-                    } else {
-                        res.send(500, {error: "Could not update user position"});
-                    }
-                });
+        if( ( typeof req.body == 'object' && ( !req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng') )) || ( req.params.lat == '' || req.params.lng == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 ) ){
+            res.send(400, {error: "No lat and/or lng specified."});
+        } else{
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'lat': req.params.lat,
+                    'lng': req.params.lng
+                }
             }
-        } else {
-            res.send(403, {error: "You are not signed in"});
+            that.updateLastPos(req.user.id, req.body.lat, req.body.lng, function(id){
+                if(id){
+                    res.send(200, {error: "false"});
+                } else {
+                    res.send(500, {error: "Could not update user position"});
+                }
+            });
         }
         return next();
     };

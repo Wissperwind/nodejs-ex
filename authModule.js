@@ -19,10 +19,10 @@ function authModule() {
                     if( encryptUtils.isPasswordCorrect(results[0].passworthash, results[0].salt, password) ){
                         return done(null, {id:results[0].id, username:username});
                     } else {
-                        return done(null, false, { error: 'Incorrect password!' });
+                        return done(null, false, { message: 'Incorrect password!' });
                     }
                 } else {
-                    return done(null, false, { error: 'Incorrect username!' });
+                    return done(null, false, { message: 'Incorrect username!' });
                 }
             } else {
                 console.log('no result')
@@ -61,7 +61,12 @@ function authModule() {
 
     // POST /login
     that.logIn = function(req, res, next) {
-
+        if( typeof req.body != 'object'){
+            req.body = {
+                'username': req.params.username,
+                'password': req.params.password
+            };
+        }
         // The local login strategy
         passport.authenticate('local', function(err, user, info) {
             if (err) {
@@ -69,7 +74,7 @@ function authModule() {
             }
 
             if(!user) {
-                res.json({"error" : info.error});
+                res.send(400, {"error" : info.message});
                 return next();
             }
 
@@ -81,7 +86,7 @@ function authModule() {
                 req.session.user_id = req.user.id;
 
                 if(user.username) {
-                    res.json({"error" : "false"});
+                    res.send(200, {"error" : "false"});
                     return next();
                 }
                 return next();
@@ -90,30 +95,11 @@ function authModule() {
     };
 
 
-    // GET /hello
-    that.helloRoute = function(req, res, next) {
-
-        //console.log(req);
-        // console.log(req["_passport"]);
-        // console.log(req['headers']);
-
-        console.log(req.isAuthenticated());
-        console.log(req.user)
-        if(req.user) {
-            console.log(req.user)
-            res.send("Hello " + req.user.username);
-        } else {
-            res.send("Hello unauthenticated user");
-        }
-
-        return next();
-    };
-
     that.ensureAuthenticated = function (req, res, next) {
         if (req.isAuthenticated()){ console.log('yes is authenticated')
             return next();
         } else { console.log('no not authenticated')
-            res.json({"error" : "Unauthenticated user"});
+            res.send(400,{"error" : "Unauthenticated user"});
         }
     }
 
