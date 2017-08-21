@@ -219,7 +219,14 @@ function friendModule(){
 
 
     that.profileSearch = function (req, res, next){
-        if( req.params.name ){
+        if( ( typeof req.body == 'object' && !req.body.hasOwnProperty('name')  ) || req.params.name == '' || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
+            res.send(400, {error: 'Insufficient Parameters'});
+        } else {
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'name': req.params.name
+                }
+            }
             database.connection.query('SELECT * FROM user_friendship WHERE user_a = ? OR user_b = ?', [req.user.id, req.user.id], function (err, results, fields2) {
                 if (!err){
                     var  friendIDs = [req.user.id];
@@ -243,14 +250,14 @@ function friendModule(){
                             var friendsObj=[];
                             for(var j = 0; j < rows.length; j++){
                                 if(!friendIDs.includes(rows[j].id))
-                                friendsObj.push({
-                                    'id': rows[j].id,
-                                    'name': rows[j].username,
-                                    'realname': rows[j].realName
-                                });
+                                    friendsObj.push({
+                                        'id': rows[j].id,
+                                        'name': rows[j].username,
+                                        'realname': rows[j].realName
+                                    });
                             }
 
-                            res.json({
+                            res.send(200, {
                                 'error': false,
                                 'friends': friendsObj
                             });
@@ -267,15 +274,22 @@ function friendModule(){
                     res.send(500, {error: "Could not get user profiles"});
                 }
             });
-
-        } else {
-            res.json({'error': 'No search parameter provided'});
-        }
+		}
         return next();
     }
 
     that.profileSearchByLocation = function (req, res, next){
-        if( req.params.lat && req.params.lng && req.params.radius ){
+        if( ( typeof req.body == 'object' && ( !req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng') || !req.body.hasOwnProperty('radius') ) ) || ( req.params.lat == '' || req.params.lng == ''|| req.params.radius == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
+            res.send(400, {error: 'Insufficient Parameters'});
+        } else {
+            if(typeof req.body !== 'object'){
+                req.body = {
+                    'lat': req.params.lat,
+                    'lng': req.params.lng,
+                    'radius': req.params.radius
+                }
+            }
+
             database.connection.query('SELECT * FROM user_friendship WHERE user_a = ? OR user_b = ?', [req.user.id, req.user.id], function (err, results, fields2) {
                 if (!err){
                     var  friendIDs = [req.user.id];
@@ -315,10 +329,7 @@ function friendModule(){
                     res.send(500, {error: "Could not get user profiles"});
                 }
             });
-
-        } else {
-            res.json({'error': 'Insufficient parameters'});
-        }
+		}
 
         return next();
     }

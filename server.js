@@ -59,7 +59,9 @@ server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUser
 server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
 server.get({url:'/friendprofile'},authModule.ensureAuthenticated, friendModule.getFriendInfo);
 server.get('/profilesearch',authModule.ensureAuthenticated, friendModule.profileSearch);
+server.get('/profilesearch/:name',authModule.ensureAuthenticated, friendModule.profileSearch);
 server.get('/profilesearchlocation',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
+server.get('/profilesearchlocation/:lat/:lng/:radius',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
 
 
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
