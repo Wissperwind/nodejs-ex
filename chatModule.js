@@ -11,15 +11,16 @@ function chatModule(){
 		if( !friendid ){
 				res.json({'error': 'Insufficient Parameters'});
 		} else {
-			database.connection.query('SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
-			 [req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
+			database.connection.query(	'DELETE FROM notifications WHERE username IN (SELECT username FROM users WHERE id = ?) AND CONCAT("New message from ", (SELECT username FROM users WHERE id = ?)) = message;'+
+										'SELECT * FROM user_chat WHERE (user_a = ? and user_b = ?) or (user_a = ? and user_b = ?) ORDER BY changed ASC',
+			 [req.user.id, friendid, req.user.id, friendid, friendid, req.user.id], function (error, results, fields) {
 				if (!error){
 					var messages = [];
-					for(var i=0; i<results.length; i++){
+					for(var i=0; i<results[1].length; i++){
 						var message = {
-							timestamp: results[i].timestamp,
-							text: results[i].message,
-							owncomment: results[i].user_a == req.user.id
+							timestamp: results[1][i].timestamp,
+							text: results[1][i].message,
+							owncomment: results[1][i].user_a == req.user.id
 						};
 						messages.push(message);
 					}
@@ -27,6 +28,7 @@ function chatModule(){
 
 				} else {
 					console.log(error.code);
+					console.log(error);
 					res.send(500, {error: "Could not find the chat with your friend"});
 				}
 			});

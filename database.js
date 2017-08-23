@@ -8,8 +8,10 @@ function dbConnection() {
 			'host' 		: 'sql11.freemysqlhosting.net',
 			'user'		: 'sql11175021',
 			'password'	: 'fXIz3dRIpx',
-			'database'	: 'sql11175021'		
+			'database'	: 'sql11175021',
+			multipleStatements: true			
 		});	
+		
 
 // for local testing
 /* 	that.connection = mysql.createConnection({
@@ -22,7 +24,7 @@ function dbConnection() {
 	that.connect = function(){
 		that.connection.connect( function(err) {
 			if(err)
-				console.log('Error connecting to db: '+err);
+				console.log('Error connecting to db: '+ err);
 			else
 				console.log('Connected to db: ' + that.connection.config.host + "/" + that.connection.config.database)
 		});

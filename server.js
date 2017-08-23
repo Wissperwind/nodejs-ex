@@ -36,10 +36,11 @@ var authModule = require('./authModule');
 }); */
 
 server.post('/signup', userModule.signUp);
+server.post('/signup/:username/:email/:password', userModule.signUp);
 server.post({url:'/login'}, authModule.logIn);
+server.post({url:'/login/:username/:password'}, authModule.logIn);
 //use authModule.ensureAuthenticated() for each request requiring authentication
 // in order to return the error when user is not authenticated
-server.get({url:'/hello'}, authModule.ensureAuthenticated, authModule.helloRoute);
 server.get({url:'/logout'}, authModule.ensureAuthenticated, function (req, res, next) {
     req.session.destroy();
     res.json({
@@ -50,6 +51,7 @@ server.get({url:'/logout'}, authModule.ensureAuthenticated, function (req, res, 
 
 server.get({url:'/account'}, authModule.ensureAuthenticated, userModule.getUserInfo);
 server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
+server.put({url:'/account/:username/:realname/:email/:age/:city'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
 server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUser);
 
 server.put({url:'/friends'},authModule.ensureAuthenticated, friendModule.postfriend);
@@ -57,7 +59,9 @@ server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUser
 server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
 server.get({url:'/friendprofile'},authModule.ensureAuthenticated, friendModule.getFriendInfo);
 server.get('/profilesearch',authModule.ensureAuthenticated, friendModule.profileSearch);
+server.get('/profilesearch/:name',authModule.ensureAuthenticated, friendModule.profileSearch);
 server.get('/profilesearchlocation',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
+server.get('/profilesearchlocation/:lat/:lng/:radius',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
 
 
 server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
@@ -68,8 +72,11 @@ server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, pho
 
 server.get({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.getPasswordResetToken); //For logged in users
 server.put({url:'/pwreset'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged in users
+server.put({url:'/pwreset/:newpassword/:safetystring'}, authModule.ensureAuthenticated, userModule.updatePassword); //For logged in users
 server.get({url:'/pw'}, userModule.getPasswordResetToken); //For logged out users
+server.get({url:'/pw/:username'}, userModule.getPasswordResetToken); //For logged out users
 server.put({url:'/pw'}, userModule.updatePassword); //For logged out users
+server.put({url:'/pw/:username/:newpassword/:safetystring'}, userModule.updatePassword); //For logged out users
 
 server.get({url:'/highscorelist'}, highscoreModule.getList);
 server.get({url:'/notification'}, notificationModule.getNotifications);
@@ -88,7 +95,8 @@ server.del('comments/:id',	commentModule.delComment);
 server.post('venues/:id/photos',	photoModule.postPhotoVenue);
 server.get('photos/:id',			photoModule.getPhoto);
 
-server.put('location',	userModule.putPosition);
+server.put('location', authModule.ensureAuthenticated, userModule.putPosition);
+server.put('location/:lat/:lng', authModule.ensureAuthenticated, userModule.putPosition);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);
