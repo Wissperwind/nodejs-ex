@@ -5,6 +5,9 @@ function commentModule(){
 	var database = require('./database');
 	
 	
+	/**
+	* Retrieves a comment via its id from the database and executes the callback function on it
+	*/
 	that.findComment = function(id, callback){
 		database.connection.query("SELECT *,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
@@ -27,6 +30,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Retrieves all comments that belong to a venue from the database and executes the callback function on them
+	*/
 	that.findCommentsByVenue = function(venueId, callback){
 		database.connection.query("SELECT comment.*,users.username,FROM_UNIXTIME(UNIX_TIMESTAMP(comment.timestamp),'%d %b %Y') AS time FROM comment LEFT JOIN users ON (comment.userID = users.id) WHERE venueID=? ORDER BY score DESC", [venueId], function(err, rows, fields){
 			if(!err){
@@ -53,6 +59,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Retrieves all comments that belong to a user from the database and executes the callback function on them
+	*/
 	that.findCommentsByUser = function(userId, callback){
 		database.connection.query("SELECT * FROM comment WHERE userID=?", [userId], function(err, rows, fields){
 			if(!err){
@@ -77,6 +86,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Inserts a comment into the database and executes the callback function on the comment and its new id
+	*/
 	that.saveComment = function(comment, callback){
 		database.connection.query("INSERT INTO comment SET userID=?, venueID=?, photoID=?, text=?",
 		[comment.user, comment.venue, comment.photo, comment.text], function(err, result){
@@ -91,6 +103,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Updates the rating of a comment defined by its id and executes the callback function on the id
+	*/
 	that.updateCommentRating = function(id, rating, callback){
 		database.connection.query("UPDATE comment SET score=? WHERE id=?", [rating, id], function(err, result){
 			if(!err){
@@ -103,6 +118,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Removes the comment defined by its id from the database and executes the callback function with status "OK" if successful
+	*/
 	that.removeComment = function(id, callback){
 		database.connection.query("DELETE FROM comment WHERE id=?", [id], function(err, rows, fields){
 			if(!err){
@@ -118,6 +136,9 @@ function commentModule(){
 	
 	
 	
+	/**
+	* Retrieves the sum of all user ratings for a comment defined by its id from the database and executes the callback function on it
+	*/
 	that.getScoreForComment = function(id, callback){
 		database.connection.query("SELECT SUM(rating) AS score FROM comment_rating WHERE comment=?", [id], function(err, rows, fields){
 			if(!err){
@@ -133,6 +154,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Retrieves a user rating for a comment from the database and executes the callback function on it
+	*/
 	that.findRating = function(comment, user, callback){
 		database.connection.query("SELECT * FROM comment_rating WHERE comment=? AND user=?", [comment, user], function(err, rows, fields){
 			if(!err){
@@ -153,6 +177,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Inserts a user rating for a comment into the database and executes the callback function on it
+	*/
 	that.insertRating = function(rating, callback){
 		database.connection.query("INSERT INTO comment_rating SET comment=?, rating=?, user=?",
 		[rating.comment, rating.rating, rating.user], function(err, result){
@@ -166,6 +193,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Sets the user rating for a venue to the new value and executes the callback function on the rating
+	*/
 	that.updateRating = function(rating, callback){
 		database.connection.query("UPDATE comment_rating SET rating=? WHERE comment=? AND user=?",
 		[rating.rating, rating.comment, rating.user], function(err, result){
@@ -179,6 +209,9 @@ function commentModule(){
 		});
 	};
 	
+	/**
+	* Removes a user rating for a comment from the database and executes the callback function with status "OK" if successful
+	*/
 	that.removeRating = function(comment, user, callback){
 		database.connection.query("DELETE FROM comment_rating WHERE comment=? AND user=?", [comment, user], function(err, rows, fields){
 			if(!err){
@@ -194,6 +227,10 @@ function commentModule(){
 	
 	
 	
+	/**
+	* Handles a POST comment request, i.e. inserts a comment into the database and sends a status response to the mobile app
+	* req must contain comment and venueid
+	*/
 	that.postComment = function(req, res, next){
 		
 		if(req.user && req.user.id && req.user.username){
@@ -218,6 +255,10 @@ function commentModule(){
 		return next();
 	};
 	
+	/**
+	* Handles a DELETE comment request and removes a comment from the database if the user has written that comment
+	* req.params must contain id
+	*/
 	that.delComment = function(req, res, next){
 		if(req.user && req.user.id){
 			that.findComment(req.params.id, function(comment){
@@ -243,6 +284,11 @@ function commentModule(){
 		return next();
 	};
 	
+	/**
+	* Handles a PUT comment rating request and inserts/updates the user's rating for the comment and updates the rating score for the comment
+	* req.params must contain id (the comment id)
+	* req.body must contain rating
+	*/
 	that.rateComment = function(req, res, next){
 		if(req.user && req.user.id){
 			that.findRating(req.params.id, req.user.id, function(rating){

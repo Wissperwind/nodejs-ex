@@ -1,7 +1,11 @@
 function chatModule(){
 	var that = this;
 	var database = require('./database');
-
+	
+	/**
+	* Retrieves all chat messages that belong to the chat between user_a and user_b from the database and sends the results to the mobile app
+	* req.params must contain friendid
+	*/
     that.getchat = function (req, res, next){
 		var friendid= req.params.friendid;
 		if( !friendid ){
@@ -12,14 +16,7 @@ function chatModule(){
 				if (!error){
 					var messages = [];
 					for(var i=0; i<results.length; i++){
-						// var date = new Date(results[i].date*1000);
 						var message = {
-							// year: date.getFullYear(),
-							// month: date.getMonth() + 1,
-							// day: date.getDate(),
-							// hour: date.getHours(),
-							// minute: date.getMinutes(),
-							// second: date.getSeconds(),
 							timestamp: results[i].timestamp,
 							text: results[i].message,
 							owncomment: results[i].user_a == req.user.id
@@ -37,6 +34,10 @@ function chatModule(){
         return next();
     }
 
+	/**
+	* Inserts a chat message and an appropriate notification into the database and sends a status response to the mobile app
+	* req.body must contain friendid, text and timestamp
+	*/
 	that.postchat = function (req, res, next){
 
 		if( !req.body.hasOwnProperty('friendid') || !req.body.hasOwnProperty('text') || !req.body.hasOwnProperty('timestamp')){

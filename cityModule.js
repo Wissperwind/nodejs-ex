@@ -5,6 +5,9 @@ function cityModule(){
 	var database = require('./database');
 	
 	
+	/**
+	* Inserts a new city into the database and executes the callback function on the city name and id
+	*/
 	that.addCity = function(name, callback){
 		database.connection.query("INSERT INTO cities SET name=?", [name], function(err, result){
 			if(!err) {
@@ -21,6 +24,9 @@ function cityModule(){
 		});
 	};
 	
+	/**
+	* Retrieves the id of a city name from the database and executes the callback function on it
+	*/
 	that.getCityID = function(name, callback){
 		console.log("Getting ID for city: "+name);
 		database.connection.query("SELECT * FROM cities WHERE name=?", [name], function(err, rows, fields){
