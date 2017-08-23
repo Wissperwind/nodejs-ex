@@ -180,6 +180,7 @@ function photoModule(){
 	};
 	
 	/**
+	* Handles a GET photo request
 	* Finds the photo file that belongs to the requested id and sends its data to the mobile application
 	* req.params must contain id (the id of the photo)
 	*/
@@ -202,6 +203,7 @@ function photoModule(){
 	};
 	
 	/**
+	* Handles a POST venue photo request
 	* Saves the received photo data in a file and associates it with a venue
 	* req.params must contain id (the venue id)
 	* req.body must contain the photo data only
@@ -233,6 +235,7 @@ function photoModule(){
 	};
 	
 	/**
+	* Handles a POST user photo request
 	* Saves the received photo data in a file and associates it with a user profile
 	* req.body must contain the photo data only
 	*/

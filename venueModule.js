@@ -13,6 +13,9 @@ function venueModule() {
 	// const USER_SEARCH_RADIUS = 1000;
 	// meters; for the mobile application, so all venues in our DB in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	
+	/**
+	* Calculates the distance between two lat-long coordinate pairs
+	*/
 	function getDistanceInMeters(lat1, lon1, lat2, lon2){
 		var radius = 6378137; // (equatorial) earth radius in meters
 		var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
@@ -27,6 +30,9 @@ function venueModule() {
 		return dist;
 	}
 	
+	/**
+	* Calculates the lat-long coordinate pair when heading 'dist' meters into the direction 'brng' from the location 'lat1'-'lon1'
+	*/
 	that.getLatLon = function(lat1, lon1, dist, brng){
 		var R = 6378137;
 		lat1 = lat1 * (Math.PI / 180);
@@ -39,10 +45,16 @@ function venueModule() {
 		return pos;
 	};
 	
+	/**
+	* checks if an array is "empty"
+	*/
 	that.isResponseEmpty = function(resArray){
 		return !((typeof resArray != "undefined") && (resArray != null) && (resArray.length > 0));
 	}
 	
+	/**
+	* Inserts a search location and radius into the database and executes the callback function on the new inserted id
+	*/
 	that.addSearch = function(lat, lng, callback) {
 		query = "INSERT INTO scanned_locations SET lat=?, lng=?, radius=?";
 		database.connection.query(
@@ -64,6 +76,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Marks a search location as complete and executes the callback function on its id
+	*/
 	that.updateSearchComplete = function(id, callback) {
 		query = "UPDATE scanned_locations SET isComplete=1 WHERE id=?";
 		database.connection.query(
@@ -79,6 +94,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Inserts a venue, its details, its types and its photos into the database and executes the callback function on the venue
+	*/
 	that.createVenue = function(venue, callback) {
 		
 		function addVenueTypes(id, types, counter, callback){
@@ -188,6 +206,10 @@ function venueModule() {
 	};
 	
 	// low detail response for list and display on map
+	/**
+	* Either retrieves a list of venues matching the value of the "keyword" key in 'options' with a small amount of details in a square with length 'dist' around 'lat','lng' and executes the callback function on it
+	* Or, if 'options' contains the "allByID" key with value true, only the venues' Google ids will be returned
+	*/
 	that.getVenuesFromDB = function(lat, lng, dist, options, callback){
 		
 		var qstr = "SELECT * FROM venues WHERE lat>=? AND lat<=? AND lng>=? AND lng<=?";
@@ -236,6 +258,9 @@ function venueModule() {
 	};
 	
 	// high detail response for venue window
+	/**
+	* Retrieves all details, including photo URLs, comments and checkins that belong to the venue defined by id and executes the callback function on the result
+	*/
 	that.findVenue = function(id, callback){
 		commentModule.findCommentsByVenue(id, function(comments){
 			checkinModule.findCheckinsByVenue(id, function(checkins){
@@ -275,6 +300,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Imports venues around 'lat','lng' that are not already in the database from Google and inserts them into the database
+	*/
 	that.importVenuesFromGoogle = function(lat, lng){
 		
 		function importAndUpload(ids, venues, counter, searchId){
@@ -327,6 +355,10 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Checks if a search circle defined by its center 'lat','lng' and 'radius' lies at least within one of the 'circles'
+	* returns true if it does, else false
+	*/
 	that.checkSearches = function(lat, lng, radius, circles){
 		
 		// In case we are not fully inside one of our previous searches
@@ -354,6 +386,10 @@ function venueModule() {
 		return needScan;
 	};
 	
+	/**
+	* Either starts importing venues from Google if the search circle with 'radius' around 'lat','lng' lies not within a previous search circle and executes the callback function with the status "searching"
+	* Or retrieves the venues from the database if a suitable completed search has been found
+	*/
 	that.searchForVenues = function(lat, lng, radius, options, callback){
 		// check if we have already scanned here
 		var d = radius;
@@ -389,6 +425,11 @@ function venueModule() {
 		);
 	};
 	
+	/**
+	* Handles GET venues requests
+	* Either sends a list of venues around the requested location or status information (in case venues are being imported) to the mobile app
+	* req.params must contain 'keyword', 'radius' and either 'city' or both 'lat' and 'lng'
+	*/
 	that.getVenues = function(req, res, next){
 		
 		function doSearch(lat, lng, radius){
@@ -458,6 +499,11 @@ function venueModule() {
 		}
 	};
 	
+	/**
+	* Handles GET venue requests
+	* Sends all details belonging to a venue to the mobile application
+	* req.params must contain 'id' (the id of the venue)
+	*/
 	that.getVenue = function(req, res, next){
 		var tmp = req.params.id;
 		
@@ -476,6 +522,9 @@ function venueModule() {
 	
 	
 	
+	/**
+	* Retrieves the rating of a user for a venue and executes the callback function on it
+	*/
 	that.findRating = function(venue, user, callback){
 		database.connection.query("SELECT * FROM venue_rating WHERE venue=? AND user_id=?", [venue, user], function(err, rows, fields){
 			if(!err){
@@ -496,6 +545,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Inserts a rating of a user for a venue and executes the callback function on it
+	*/
 	that.insertRating = function(rating, callback){
 		database.connection.query("INSERT INTO venue_rating SET venue=?, rating=?, user_id=?",
 		[rating.venue, rating.rating, rating.user], function(err, result){
@@ -509,6 +561,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Updates the rating of a user for a venue and executes the callback function on it
+	*/
 	that.updateRating = function(rating, callback){
 		database.connection.query("UPDATE venue_rating SET rating=? WHERE venue=? AND user_id=?",
 		[rating.rating, rating.venue, rating.user], function(err, result){
@@ -522,6 +577,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Retrieves the average rating for a venue and executes the callback function on it
+	*/
 	that.getAvgForVenue = function(id, callback){
 		database.connection.query("SELECT AVG(rating) AS avg FROM venue_rating WHERE venue=?", [id], function(err, rows, fields){
 			if(!err){
@@ -537,6 +595,9 @@ function venueModule() {
 		});
 	};
 	
+	/**
+	* Updates the average rating of a venue and executes the callback function on the venue's id
+	*/
 	that.updateVenueRating = function(id, rating, callback){
 		database.connection.query("UPDATE venues SET rating=? WHERE id=?", [rating, id], function(err, result){
 			if(!err){
@@ -551,6 +612,11 @@ function venueModule() {
 	
 	
 	
+	/**
+	* Handles GET user rating for venue requests
+	* Retrieves the rating of a user for a venue and sends it to the mobile app
+	* req.params must contain 'id' (the venue id)
+	*/
 	that.getRatingForUser = function(req, res, next){
 		if(req.user && req.user.id){
 			console.log("Request for rating venue;user: " + req.params.id + ";" + req.user.id);
@@ -567,6 +633,11 @@ function venueModule() {
 		return next();
 	};
 	
+	/**
+	* Handles POST checkin requests
+	* Tries to check in a user into a venue and update the venue's average rating
+	* req.body must contain 'id' (the venue id) and 'rating'
+	*/
 	that.checkIn = function(req, res, next){
 		if(req.user && req.user.id){
 			if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('rating')){
