@@ -28,7 +28,7 @@ function checkinModule(){
 	};
 	
 	/**
-	* Retrieves all user-venue pair checkins for a venue defined by its id from the database, ordered descending by the number of checkins, and executes the callback function on them
+	* Retrieves all user-venue pair checkins for a venue defined by its id from the database, ordered descending by the checkin counters, and executes the callback function on them
 	*/
 	that.findCheckinsByVenue = function(venueId, callback){
 		database.connection.query("SELECT * FROM user_checkin_venue LEFT JOIN users ON (userID = id) WHERE venueID=? ORDER BY checkin_count DESC", [venueId], function(err, rows, fields){

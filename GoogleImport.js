@@ -8,6 +8,9 @@ function GoogleImporter(){
 	const request = require('request');
 	var photoModule = require('./photoModule');
 	
+	/**
+	* Converts a given location name to lat/long coordinates and executes the callback function on them
+	*/
 	that.convertToLatLng = function(str, callback){
 		
 		var options = {
@@ -37,6 +40,9 @@ function GoogleImporter(){
 		});
 	}
 	
+	/**
+	* Imports a photo (defined by its reference) for a venue (defined by its id) and executes the callback function with status "OK" if successful
+	*/
 	that.getVenuePhoto = function(id, ref, callback){
 		var options = {
 			method: 'GET',
@@ -84,6 +90,9 @@ function GoogleImporter(){
 		});
 	};
 	
+	/**
+	* Imports the details of a venue defined by its Google id and executes the callback on them
+	*/
 	that.getVenueDetails = function(id, callback){
 		
 		var options = {
@@ -113,6 +122,9 @@ function GoogleImporter(){
 		});
 	};
 	
+	/**
+	* Searches for and imports unique Google venue ids in a radius around a location (lat, lng) and executes the callback function on them
+	*/
 	that.getVenues = function(lat, lng, callback){
 		
 		// typestr: 'restaurant' or 'bar' or ... (see Google Places -> Types)
