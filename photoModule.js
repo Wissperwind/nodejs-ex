@@ -150,6 +150,36 @@ function photoModule(){
 	};
 	
 	/**
+	* Deletes a photo file and executes the callback function with status "OK" if successful
+	*/
+	that.deletePhoto = function(path, callback){
+		fs.unlink(path, function(err){
+			if(!err){
+				console.log("Deleted photo: "+path);
+				callback("OK");
+			} else {
+				console.log(err);
+				callback(null);
+			}
+		});
+	};
+	
+	/**
+	* Deletes a photo entry in the database and executes the callback function with status "OK" if successful
+	*/
+	that.removePhoto = function(id, callback){
+        database.connection.query("DELETE FROM photo WHERE id=?", [id], function (err, results, fields) {
+            if (!err){
+                console.log(results.affectedRows + " record deleted");
+				callback("OK");
+            } else {
+                console.log(error.code);
+				callback(null);
+            }
+        });
+	};
+	
+	/**
 	* Inserts an entry that associates a photo (defined by its id) with a venue (defined by its id) and possibly the user (defined by its id) who uploaded it and executes the callback function with status "OK" if successful
 	*/
 	that.addPhotoToVenue = function(venueId, photoId, userId, callback){
@@ -244,15 +274,63 @@ function photoModule(){
 			if(req.headers["content-type"] != "image/jpeg" && req.headers["content-type"] != "image/png"){
 				res.send(400, {error: "Only JPEG and PNG images are allowed"});
 			} else {
-				that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
-					if(photoId){
-						that.addPhotoToUser(req.user.id, photoId, function(str){
-							if(str)
-								res.send(200, {error: "false"});
-							else
-								res.send(500, {error: "Could not add photo to user"});
-						});
+				// check if a user has already uploaded a profile picture
+				database.connection.query("SELECT * FROM users WHERE id=? AND profilePicture IS NOT NULL", [req.user.id], function(err, rows, fields){
+					if(!err){
+						var userPhotoId;
+						for(var i=0; i<rows.length; i++){
+							userPhotoId = rows[i].profilePicture;
+						}
+						// if not, then upload the new profile picture
+						if(i == 0){
+							console.log("Adding new profile picture");
+							that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
+								if(photoId){
+									that.addPhotoToUser(req.user.id, photoId, function(str){
+										if(str)
+											res.send(200, {error: "false"});
+										else
+											res.send(500, {error: "Could not add photo to user"});
+									});
+								} else {
+									res.send(500, {error: "Could not save photo"});
+								}
+							});
+						// if yes, delete the old profile picture file first
+						} else {
+							console.log("Replacing old profile picture");
+							that.findPhotoPathId(userPhotoId, function(photo){
+								that.deletePhoto(photo.path, function(foo){
+									if(foo){
+										that.removePhoto(userPhotoId, function(bar){
+											if(bar){
+												that.savePhoto(req.body, req.headers["content-type"] == "image/jpeg" ? ".jpg" : ".png", function(photoId){
+													if(photoId){
+														that.addPhotoToUser(req.user.id, photoId, function(str){
+															if(str)
+																res.send(200, {error: "false"});
+															else
+																res.send(500, {error: "Could not add photo to user"});
+														});
+													} else {
+														res.send(500, {error: "Could not save photo"});
+													}
+												});
+											} else {
+												console.log("Could not delete old profile picture entry");
+												res.send(500, {error: "Could not save photo"});
+											}
+										});
+									} else {
+										console.log("Could not delete old profile picture file");
+										res.send(500, {error: "Could not save photo"});
+									}
+								});
+							});
+						}
 					} else {
+						console.log("Error querying DB for user photo");
+						console.log(err);
 						res.send(500, {error: "Could not save photo"});
 					}
 				});
