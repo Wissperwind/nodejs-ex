@@ -9,7 +9,12 @@ function authModule() {
     var userModule = require('./userModule');
     var encryptUtils = require('./encryptUtils');
 
-    // Lookup a user in database
+    /**
+     * Lookup a user in database
+     * @param {String} username
+     * @param {String} password
+     * @param {Function} done
+     */
     var lookupUser = function(username, password, done) {
 
         var query = 'SELECT * FROM users WHERE username = ?';
@@ -38,20 +43,25 @@ function authModule() {
 
 
     server.use(sessions({
+        // cookie name dictates the key name added to the request object
         cookieName: 'session',
+        // should be a large unguessable string
         secret: 'TkipIsTheBest',
-        duration: 5 * 86400 * 1000    // 5 days
+        // how long the session will stay valid in ms
+        duration: 30 * 86400 * 1000    // 30 days
     }));
 
     // Initialize passport
     server.use(passport.initialize());
     // Set up the passport session
     server.use(passport.session());
-    
+
+    // This is how a user gets serialized
     passport.serializeUser(function(user, done) {
         done(null, user.id);
     });
 
+    // This is how a user gets deserialized
     passport.deserializeUser(function(id, done) {
         userModule.findUser(id, function(user){
             done(null, user);
@@ -59,7 +69,7 @@ function authModule() {
     });
 
 
-    // POST /login
+    // logs the user in after authenticating credentials
     that.logIn = function(req, res, next) {
         if( typeof req.body != 'object'){
             req.body = {
@@ -94,7 +104,7 @@ function authModule() {
         })(req, res, next);
     };
 
-
+    //Sends unauthenticated error message for unauthenticated requests
     that.ensureAuthenticated = function (req, res, next) {
         if (req.isAuthenticated()){ console.log('yes is authenticated')
             return next();

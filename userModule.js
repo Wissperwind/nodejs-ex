@@ -7,6 +7,15 @@ function userModule(){
 	var encryptUtils = require('./encryptUtils');
     var mail = require("nodemailer").mail;
 
+    /**
+     * Inserts a new user record in the database after hashing submitted password.
+     *
+     * @param {Object} user - Information about the user.
+     * @param {String} user.username
+     * @param {String} user.email
+     * @param {String} user.password
+     * @param {function} callback - A callback to run
+     */
     createUser = function (user, callback){
         var hashResult = encryptUtils.hashPassword(user.password);
         var post  = {
@@ -50,6 +59,12 @@ function userModule(){
             }
         });
     }
+
+    /**
+     * Handles the signup request
+     * Validates that the required parameters email, password and username are provided and not empty
+     * Passes validated parameters to the createUser function
+     */
     that.signUp = function (req, res, next){
         if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('password')) ) || ( req.params.username == '' || req.params.email == '' || req.params.password == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
             res.send(400, {error: 'Insufficient Parameters'});
@@ -72,6 +87,11 @@ function userModule(){
         }
         return next();
     }
+
+    /**
+     * Retrieves user information and sends it as JSON,
+     * gets user id from the request object of the authenticated user
+     */
     that.getUserInfo = function (req, res, next){
         console.log('user id is:' + req.user.id);
 		checkinModule.findCheckinsByUser(req.user.id, function(checkins){
@@ -106,6 +126,12 @@ function userModule(){
 		});
         return next();
     }
+
+    /**
+     * Updates user information
+     * uses user id from the request object of the authenticated user
+     * Requires username, realname, email, age and city parameters
+     */
     that.updateUserInfo = function (req, res, next){
         if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('realname') || !req.body.hasOwnProperty('email') || !req.body.hasOwnProperty('age') || !req.body.hasOwnProperty('city') )) || (req.params.username == '' ||req.params.realname == '' ||req.params.email == '' ||req.params.age == '' ||req.params.city == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 ) ){
             res.send(400, {'error': 'Insufficient Parameters'});
@@ -138,6 +164,11 @@ function userModule(){
         }
         return next();
     }
+
+    /**
+     * Deletes user account
+     * gets user id from the request object of the authenticated user
+     */
     that.deleteUser = function (req, res, next){
         var query = 'DELETE FROM users WHERE id = ?';console.log('in delete')
         database.connection.query(query, [req.user.id], function (error, results, fields) {
@@ -157,6 +188,11 @@ function userModule(){
         return next();
     }
 
+    /**
+     * Checks for user id for calling functions
+     * Requires user name in request parameters for logged out users or
+     * gets the user id from the request object of logged in users
+     */
     var getUserID = function (req, res, callback) {
         var userid;
         //if logged out user; requires username parameter
@@ -193,6 +229,12 @@ function userModule(){
             callback(userid);
         }
     }
+
+    /**
+     * Generates, stores and emails a password reset token to the user email address
+     * Requires username in request parameters for logged out users or
+     * uses user id from the request object of logged in users
+     */
     that.getPasswordResetToken = function (req, res, next){
         getUserID(req, res, function (result) {
             var userid = result;
@@ -232,6 +274,12 @@ function userModule(){
 
         });
     }
+
+    /**
+     * Matches user submitted password reset token with the stored token in db
+     * Requires username, newpassword and safety string in request parameters for logged out users or
+     * For logged in users requires new password and safety string, and uses user id from the request object
+     */
     that.updatePassword = function (req, res, next){
 
         if( ( typeof req.body == 'object' && (!req.body.hasOwnProperty('newpassword') || !req.body.hasOwnProperty('safetystring') ) ) || ( req.params.newpassword == '' || req.params.safetystring == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
@@ -291,8 +339,9 @@ function userModule(){
 
     }
 
-
-
+    /**
+     * Gets user name by user id
+     */
     that.findUser = function(id, callback){
         database.connection.query("SELECT * FROM users WHERE id=?", [id], function(err, rows, fields){
             if(!err){
@@ -311,6 +360,10 @@ function userModule(){
         });
     };
 
+    /**
+     * Updates the latest geo location of the user in database
+     * Requires user id, latitude and longitude parameters
+     */
     that.updateLastPos = function(id, lat, lng, callback){
         database.connection.query("UPDATE users SET lastLat=?, lastLong=? WHERE id=?", [lat, lng, id], function(err, result){
             if(!err){
@@ -324,6 +377,11 @@ function userModule(){
         });
     }
 
+    /**
+     * Handles user location update requests
+     * Requires user id, latitude and longitude parameters,
+     * passes these parameters to the updateLastPos function
+     */
     that.putPosition = function(req, res, next){
         if( ( typeof req.body == 'object' && ( !req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng') )) || ( req.params.lat == '' || req.params.lng == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 ) ){
             res.send(400, {error: "No lat and/or lng specified."});

@@ -217,7 +217,10 @@ function friendModule(){
     }
 
 
-
+    /**
+     * Search user profiles by name
+     * @param {String} name - attempts to make a match with username, real name or full email address
+     */
     that.profileSearch = function (req, res, next){
         if( ( typeof req.body == 'object' && !req.body.hasOwnProperty('name')  ) || req.params.name == '' || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
             res.send(400, {error: 'Insufficient Parameters'});
@@ -256,9 +259,13 @@ function friendModule(){
                                         'realname': rows[j].realName
                                     });
                             }
-
-                            res.send(200, {
-                                'error': false,
+                            var errorResponse = false, responseCode = 200;
+                            if(friendsObj.length === 0){
+                                errorResponse = 'No users found';
+                                responseCode = 400;
+							}
+                            res.send(responseCode, {
+                                'error': errorResponse,
                                 'friends': friendsObj
                             });
 
@@ -278,6 +285,10 @@ function friendModule(){
         return next();
     }
 
+    /**
+     * Search user profiles by location
+     * Required parameters: lat, lng, radius
+     */
     that.profileSearchByLocation = function (req, res, next){
         if( ( typeof req.body == 'object' && ( !req.body.hasOwnProperty('lat') || !req.body.hasOwnProperty('lng') || !req.body.hasOwnProperty('radius') ) ) || ( req.params.lat == '' || req.params.lng == ''|| req.params.radius == '' ) || (typeof req.body !== 'object' && Object.keys(req.params).length === 0 )){
             res.send(400, {error: 'Insufficient Parameters'});
@@ -312,9 +323,13 @@ function friendModule(){
                                         'realname': rows[j].realName
                                     });
                             }
-
-                            res.json({
-                                'error': false,
+                            var errorResponse = false, responseCode = 200;
+                            if(friendsObj.length === 0){
+                                errorResponse = 'No users found';
+                                responseCode = 400;
+                            }
+                            res.send(responseCode, {
+                                'error': errorResponse,
                                 'friends': friendsObj
                             });
 
