@@ -1,6 +1,4 @@
-function venueModule() {	
-	
-	// There could be a problem in the queries when at the border of longitude where lng 180 swaps to lng -180
+function venueModule() {
 	
 	var that = this;
 
@@ -10,8 +8,6 @@ function venueModule() {
 	var checkinModule = require('./checkinModule');
 	var photoModule = require('./photoModule');
 	var GoogleImport = require('./GoogleImport');
-	// const USER_SEARCH_RADIUS = 1000;
-	// meters; for the mobile application, so all venues in our DB in the USER_SEARCH_RADIUS around request.lat,lng are displayed
 	
 	/**
 	* Calculates the distance between two lat-long coordinate pairs
@@ -31,7 +27,7 @@ function venueModule() {
 	}
 	
 	/**
-	* Calculates the lat-long coordinate pair when heading 'dist' meters into the direction 'brng' from the location 'lat1'-'lon1'
+	* Calculates the lat-long coordinate pair when heading 'dist' meters into the direction 'brng' from the location 'lat1','lon1'
 	*/
 	that.getLatLon = function(lat1, lon1, dist, brng){
 		var R = 6378137;
@@ -356,7 +352,7 @@ function venueModule() {
 	};
 	
 	/**
-	* Checks if a search circle defined by its center 'lat','lng' and 'radius' lies at least within one of the 'circles'
+	* Checks if a search circle defined by its center 'lat','lng' and 'radius' lies at least within one of the previous search 'circles'
 	* returns true if it does, else false
 	*/
 	that.checkSearches = function(lat, lng, radius, circles){

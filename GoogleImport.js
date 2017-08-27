@@ -2,7 +2,7 @@ function GoogleImporter(){
 
 	var that = this;
 	
-	const GOOGLE_KEY = "AIzaSyC-hkv1dS7t-jXthfGmCOIjwyvPnUCLvDE"; //Should go into the environment variables for secrecy
+	const GOOGLE_KEY = "AIzaSyC-hkv1dS7t-jXthfGmCOIjwyvPnUCLvDE";
 	that.SEARCH_RADIUS = 2000; // meters
 	
 	const request = require('request');

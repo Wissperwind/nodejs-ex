@@ -25,6 +25,7 @@ server.on('uncaughtException', function (req, res, route, err) {
 
 var authModule = require('./authModule');
 
+// request debugging
 /* server.use(function(req, res, next){
 	console.log("-----Incoming request:");
 	console.log("-Full request:\n", req);
@@ -35,9 +36,9 @@ var authModule = require('./authModule');
 	return next();
 }); */
 
-server.post('/signup', userModule.signUp);
-server.post('/signup/:username/:email/:password', userModule.signUp);
-server.post({url:'/login'}, authModule.logIn);
+server.post('/signup', 								userModule.signUp);
+server.post('/signup/:username/:email/:password',	userModule.signUp);
+server.post({url:'/login'}, 					authModule.logIn);
 server.post({url:'/login/:username/:password'}, authModule.logIn);
 //use authModule.ensureAuthenticated() for each request requiring authentication
 // in order to return the error when user is not authenticated
@@ -54,7 +55,7 @@ server.put({url:'/account'}, authModule.ensureAuthenticated, userModule.updateUs
 server.put({url:'/account/:username/:realname/:email/:age/:city'}, authModule.ensureAuthenticated, userModule.updateUserInfo);
 server.del({url:'/account'}, authModule.ensureAuthenticated, userModule.deleteUser);
 
-server.put({url:'/friends'},authModule.ensureAuthenticated, friendModule.postfriend);
+server.put({url:'/friends'},authModule.ensureAuthenticated, friendModule.putfriend);
 server.get({url:'/friends'},authModule.ensureAuthenticated, friendModule.getUserfriend);
 server.del({url:'/friends/:friendid'},authModule.ensureAuthenticated, friendModule.deleteUser);
 server.get({url:'/friendprofile'},authModule.ensureAuthenticated, friendModule.getFriendInfo);
@@ -64,9 +65,9 @@ server.get('/profilesearchlocation',authModule.ensureAuthenticated, friendModule
 server.get('/profilesearchlocation/:lat/:lng/:radius',authModule.ensureAuthenticated, friendModule.profileSearchByLocation);
 
 
-server.post({url:'/chat'}, authModule.ensureAuthenticated,chat.postchat);
+server.post({url:'/chat'},	authModule.ensureAuthenticated, chat.postchat);
 //server.get({url:'/chat/:friendid'},authModule.ensureAuthenticated, chat.getchat);
-server.get({url:'/chat'},authModule.ensureAuthenticated, chat.getchat);
+server.get({url:'/chat'},	authModule.ensureAuthenticated, chat.getchat);
 
 server.post({url:'/account/profilepicture'}, authModule.ensureAuthenticated, photoModule.postPhotoUser);
 
@@ -84,19 +85,18 @@ server.get({url:'/notification'}, notificationModule.getNotifications);
 server.get('venues',		venueModule.getVenues);
 server.get('venues/:id',	venueModule.getVenue);
 
-server.post('checkin',	venueModule.checkIn);
+server.post('checkin',				authModule.ensureAuthenticated, venueModule.checkIn);
+server.get('venues/:id/ratings', 	authModule.ensureAuthenticated, venueModule.getRatingForUser);
 
-server.get('venues/:id/ratings',venueModule.getRatingForUser);
+server.post('comments',		authModule.ensureAuthenticated, commentModule.postComment);
+server.put('comments/:id',	authModule.ensureAuthenticated, commentModule.rateComment);
+server.del('comments/:id',	authModule.ensureAuthenticated, commentModule.delComment);
 
-server.post('comments',		commentModule.postComment); //comment:..., venueid:...
-server.put('comments/:id',	commentModule.rateComment);
-server.del('comments/:id',	commentModule.delComment);
-
-server.post('venues/:id/photos',	photoModule.postPhotoVenue);
+server.post('venues/:id/photos',	authModule.ensureAuthenticated, photoModule.postPhotoVenue);
 server.get('photos/:id',			photoModule.getPhoto);
 
-server.put('location', authModule.ensureAuthenticated, userModule.putPosition);
-server.put('location/:lat/:lng', authModule.ensureAuthenticated, userModule.putPosition);
+server.put('location', 				authModule.ensureAuthenticated, userModule.putPosition);
+server.put('location/:lat/:lng', 	authModule.ensureAuthenticated, userModule.putPosition);
 
 server.listen(port, function(){
 	console.log('%s is listening at %s', server.name, server.url);

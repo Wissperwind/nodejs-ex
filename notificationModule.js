@@ -4,7 +4,9 @@ function notificationModule() {
 	var database = require('./database');
 
 
-
+	/**
+	* Retrieves a list of all notifications for a user from the database and executes the callback function on it
+	*/
 	that.loadNotifications = function(req, callback){
 		
 		
@@ -52,7 +54,11 @@ function notificationModule() {
 		};
 		
 	
-	
+	/**
+	* Handles GET notifications requests
+	* Sends all notifications for a user to the mobile application
+	* req.params must contain 'username'
+	*/
 	that.getNotifications = function(req, res, next){
 	
 		if(!req.params.username){

@@ -4,7 +4,9 @@ function highscoreModule() {
 	var database = require('./database');
 
 
-
+	/**
+	* Retrieves a list of all users and their checkins from the database and executes the callback function on it
+	*/
 	that.loadList = function(callback){
 		
 		query = "SELECT username, COUNT(username) AS amount FROM users, user_checkin_venue WHERE users.id = user_checkin_venue.userID GROUP BY username ORDER BY COUNT(username) DESC";
@@ -36,7 +38,10 @@ function highscoreModule() {
 		};
 		
 	
-	
+	/**
+	* Handles GET highscore list requests
+	* Sends the highscore list to the mobile application
+	*/
 	that.getList = function(req, res, next){
 	
 	

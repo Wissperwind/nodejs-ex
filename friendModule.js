@@ -5,7 +5,13 @@ function friendModule(){
 	var checkinModule = require('./checkinModule');
 	var photoModule = require('./photoModule');
 
-	that.postfriend = function (req, res, next){
+	/**
+	* Handles POST friendship requests
+	* Creates a friendship between two users, either via the other user's id or the id of a comment another user has written
+	* Also creates an appropriate notification
+	* req.body must contain 'userid' or 'commentid'
+	*/
+	that.putfriend = function (req, res, next){
 
 		function processFriend(user){
 			if(user == req.user.id){
@@ -99,6 +105,9 @@ function friendModule(){
 		}
 	}
 
+	/**
+	* Retrieves an object listing all friends of a user (defined by its 'id') from the database and executes the callback function on it
+	*/
 	function findFriends(id, callback){
 
 		database.connection.query("SELECT user_friendship.*,users_a.*,users_b.id AS id2,users_b.username AS username2,users_b.realName AS realName2,users_b.lastLat AS lastLat2,users_b.lastLong AS lastLong2 FROM user_friendship LEFT JOIN users AS users_a ON (user_a = users_a.id) LEFT JOIN users AS users_b ON (user_b = users_b.id) WHERE user_a=? OR user_b=?", [id, id], function(err, rows, fields){
@@ -133,6 +142,10 @@ function friendModule(){
 		});
 	}
 
+	/**
+	* Handles GET friends requests
+	* Sends all friends and some details to the mobile application
+	*/
     that.getUserfriend = function (req, res, next){
 
 		findFriends(req.user.id, function(friends){
@@ -149,7 +162,11 @@ function friendModule(){
         return next();
     }
 	
-	
+	/**
+	* Handles GET friend profile requests
+	* Sends all available details of a friend profile to the mobile application
+	* req.params must contain 'userid' (the friend's user id)
+	*/
 	that.getFriendInfo = function (req, res, next){
 		if( !req.params.hasOwnProperty('userid') ){
 				res.json({'error': 'Insufficient Parameters'});
@@ -192,13 +209,17 @@ function friendModule(){
 	}
 
 
-
+	/**
+	* Handles DELETE friendship requests
+	* Deletes the friendship between two users and sends the result's status to the mobile application
+	* req.params must contain 'friendid'
+	*/
     that.deleteUser = function (req, res, next){
 			var friendid= req.params.friendid;
 			if( !friendid ){
 					res.json({'error': 'Insufficient Parameters'});
 			} else {
-        var query = 'DELETE FROM user_friendship WHERE (user_a=? and user_b=?) or (user_a=? and user_b=?)';//console.log('in delete')
+        var query = 'DELETE FROM user_friendship WHERE (user_a=? and user_b=?) or (user_a=? and user_b=?)';
         database.connection.query(query, [req.user.id,friendid,friendid,req.user.id], function (error, results, fields) {
             if (!error){
                 console.log(results.affectedRows + " record deleted");
